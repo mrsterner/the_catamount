@@ -29,3 +29,5 @@ side = "BOTH"
 
 [[mixins]]
 config = "the_catamount.mixins.json"
+[[mixins]]
+config = "the_catamount-common.mixins.json"

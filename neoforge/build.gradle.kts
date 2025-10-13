@@ -8,6 +8,7 @@ architectury {
 }
 
 val minecraftVersion = project.properties["minecraft_version"] as String
+val geckolibVersion = project.properties["geckolib_version"] as String
 
 configurations {
     create("common")
@@ -31,6 +32,8 @@ loom {
 
 dependencies {
     neoForge("net.neoforged:neoforge:${project.properties["neoforge_version"]}")
+
+    implementation("software.bernie.geckolib:geckolib-neoforge-${minecraftVersion}:${geckolibVersion}")
 
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowBundle"(project(":common", "transformProductionNeoForge"))

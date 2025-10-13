@@ -8,6 +8,8 @@ public class TCDatagen implements DataGeneratorEntrypoint {
 	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
 		var pack = fabricDataGenerator.createPack();
 
+		pack.addProvider(TCModelProvider::new);
 		pack.addProvider(TCLangProvider::new);
+		pack.addProvider(TCSoulConversionProvider::new);
 	}
 }

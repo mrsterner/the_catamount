@@ -6,6 +6,8 @@
   "client": [
   ],
   "mixins": [
+    "LightningBoltMixin",
+    "BaseFireBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

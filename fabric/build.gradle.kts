@@ -8,6 +8,7 @@ architectury {
 }
 
 val minecraftVersion = project.properties["minecraft_version"] as String
+val geckolibVersion = project.properties["geckolib_version"] as String
 
 configurations {
     create("common")
@@ -27,11 +28,26 @@ configurations {
 
 loom.accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
-fabricApi.configureDataGeneration()
+loom {
+    runs {
+        create("data") {
+            client()
+            name = "Data Generation"
+            vmArgs(
+                "-Dfabric-api.datagen",
+                "-Dfabric-api.datagen.output-dir=${project(":common").file("src/main/generated")}",
+                "-Dfabric-api.datagen.modid=the_catamount"
+            )
+            runDir = "build/datagen"
+        }
+    }
+}
 
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
     modApi("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}+$minecraftVersion")
+
+    modImplementation("software.bernie.geckolib:geckolib-fabric-${minecraftVersion}:${geckolibVersion}")
 
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowBundle"(project(":common", "transformProductionFabric"))

@@ -18,6 +18,9 @@
     "main": [
       "dev.sterner.the_catamount.fabric.TheCatamountFabric"
     ],
+    "client": [
+      "dev.sterner.the_catamount.fabric.TheCatamountClientFabric"
+    ],
     "fabric-datagen": [
         "dev.sterner.the_catamount.fabric.datagen.TCDatagen"
     ]

@@ -39,6 +39,7 @@ public class TheCatamountNeoForge {
         BLOCKS.register("bone_heap", () -> TCBlocks.BONE_HEAP);
 
 
+        TCDataAttachmentsNeoForge.ATTACHMENT_TYPES.register(eventBus);
         ENTITY_TYPES.register(eventBus);
         ITEMS.register(eventBus);
         BLOCKS.register(eventBus);
@@ -50,4 +51,6 @@ public class TheCatamountNeoForge {
     public static void registerListeners(AddReloadListenerEvent event) {
         event.addListener(SoulConversionListener.LOADER);
     }
+
+
 }

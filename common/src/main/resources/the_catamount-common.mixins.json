@@ -6,8 +6,9 @@
   "client": [
   ],
   "mixins": [
+    "BaseFireBlockMixin",
     "LightningBoltMixin",
-    "BaseFireBlockMixin"
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

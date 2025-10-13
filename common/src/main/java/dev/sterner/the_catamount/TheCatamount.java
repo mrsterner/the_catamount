@@ -11,6 +11,7 @@ public class TheCatamount {
 
     public static void init() {
 
+
     }
 
     public static ResourceLocation id(String path) {

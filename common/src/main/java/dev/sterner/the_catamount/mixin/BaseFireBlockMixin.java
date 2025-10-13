@@ -42,9 +42,9 @@ public class BaseFireBlockMixin {
                         stack = new ItemStack(TCItems.WHITE_ASH, stack.getCount());
                         itemEntity.setItem(stack);
 
-                        double dx = (entity.getRandom().nextDouble() - 0.5) * 0.25;
-                        double dy = 0.1 + entity.getRandom().nextDouble() * 0.1;
-                        double dz = (entity.getRandom().nextDouble() - 0.5) * 0.25;
+                        double dx = (entity.getRandom().nextDouble() - 0.5) * 0.3;
+                        double dy = 0.2 + entity.getRandom().nextDouble() * 0.15;
+                        double dz = (entity.getRandom().nextDouble() - 0.5) * 0.3;
                         itemEntity.setDeltaMovement(dx, dy, dz);
 
                         ci.cancel();

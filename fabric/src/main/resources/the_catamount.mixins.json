@@ -6,6 +6,7 @@
   "client": [
   ],
   "mixins": [
+    "PlayerDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

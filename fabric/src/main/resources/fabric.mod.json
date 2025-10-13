@@ -1,36 +1,33 @@
 {
-    "schemaVersion": 1,
-    "id": "${mod_id}",
-    "version": "${version}",
-    "name": "${mod_name}",
-    "description": "${description}",
-    "authors": [
-        "${mod_author}"
+  "schemaVersion": 1,
+  "id": "the_catamount",
+  "version": "${version}",
+  "name": "The Catamount",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "cybercat5555, mrsterner"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": ""
+  },
+  "license": "Insert License Here",
+  "icon": "assets/the_catamount/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.sterner.the_catamount.fabric.TheCatamountFabric"
     ],
-    "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
-    },
-    "license": "${license}",
-    "icon": "${mod_id}.png",
-    "environment": "*",
-    "entrypoints": {
-        "main": [
-            "com.example.examplemod.ExampleMod"
-        ]
-    },
-    "mixins": [
-        "${mod_id}.mixins.json",
-        "${mod_id}.fabric.mixins.json"
-    ],
-    "depends": {
-        "fabricloader": ">=${fabric_loader_version}",
-        "fabric-api": "*",
-        "minecraft": "${minecraft_version}",
-        "java": ">=${java_version}"
-    },
-    "suggests": {
-        "another-mod": "*"
-    }
+    "fabric-datagen": [
+        "dev.sterner.the_catamount.fabric.datagen.TCDatagen"
+    ]
+  },
+  "mixins": [
+    "the_catamount.mixins.json",
+    "the_catamount-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.21.1"
+  }
 }
-  

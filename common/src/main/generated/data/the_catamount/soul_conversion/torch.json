@@ -1,0 +1,4 @@
+{
+  "fromBlock": "minecraft:torch",
+  "toBlock": "minecraft:soul_torch"
+}

@@ -1,0 +1,4 @@
+{
+  "fromBlock": "minecraft:lantern",
+  "toBlock": "minecraft:soul_lantern"
+}

@@ -1,0 +1,4 @@
+{
+  "fromBlock": "minecraft:campfire",
+  "toBlock": "minecraft:soul_campfire"
+}

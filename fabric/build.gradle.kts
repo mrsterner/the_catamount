@@ -43,6 +43,14 @@ loom {
     }
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDir(project(":common").file("src/main/generated"))
+        }
+    }
+}
+
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
     modApi("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}+$minecraftVersion")

@@ -1,6 +1,7 @@
 package dev.sterner.the_catamount.catamount_events;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
+import dev.sterner.the_catamount.data_attachment.SoulConversionDataAttachment;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,15 +13,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PassiveEvents {
 
@@ -51,7 +50,6 @@ public class PassiveEvents {
     }
 
     public static class SoulFireConversionEvent extends CatamountEvent {
-        private static final Map<BlockPos, ConversionRecord> ACTIVE_CONVERSIONS = new HashMap<>();
 
         public SoulFireConversionEvent() {
             super(EventType.PASSIVE, false);
@@ -67,6 +65,7 @@ public class PassiveEvents {
             long endTime = level.getGameTime() + duration;
 
             boolean foundAny = false;
+            SoulConversionDataAttachment.Data data = SoulConversionDataAttachment.getData(level);
 
             for (BlockPos pos : BlockPos.betweenClosed(
                     center.offset(-10, -10, -10),
@@ -77,32 +76,42 @@ public class PassiveEvents {
 
                 if (SoulConversionListener.CONVERSION_PAIR.containsKey(block)) {
                     BlockPos immutablePos = pos.immutable();
-                    ACTIVE_CONVERSIONS.put(immutablePos, new ConversionRecord(state, endTime));
+                    SoulConversionDataAttachment.ConversionRecord record =
+                            new SoulConversionDataAttachment.ConversionRecord(state, endTime);
 
+                    data = data.withConversion(immutablePos, record);
                     SoulConversionListener.convertBlock(level, immutablePos, block);
                     foundAny = true;
                 }
             }
 
             if (foundAny) {
+                SoulConversionDataAttachment.setData(level, data);
                 level.playSound(null, center, SoundEvents.SOUL_ESCAPE.value(),
                         SoundSource.AMBIENT, 0.8f, 0.8f);
             }
         }
 
         public static void tickConversions(ServerLevel level) {
-            if (ACTIVE_CONVERSIONS.isEmpty()) return;
+            if (level.dimension() != Level.OVERWORLD) {
+                return;
+            }
+
+            SoulConversionDataAttachment.Data data = SoulConversionDataAttachment.getData(level);
+
+            if (data.activeConversions().isEmpty()) return;
 
             long currentTime = level.getGameTime();
-            Iterator<Map.Entry<BlockPos, ConversionRecord>> iterator = ACTIVE_CONVERSIONS.entrySet().iterator();
+            boolean changed = false;
 
-            while (iterator.hasNext()) {
-                Map.Entry<BlockPos, ConversionRecord> entry = iterator.next();
+            for (Map.Entry<BlockPos, SoulConversionDataAttachment.ConversionRecord> entry :
+                    new ArrayList<>(data.activeConversions().entrySet())) {
+
                 BlockPos pos = entry.getKey();
-                ConversionRecord record = entry.getValue();
+                SoulConversionDataAttachment.ConversionRecord record = entry.getValue();
 
-                if (currentTime >= record.endTime) {
-                    level.setBlock(pos, record.originalState, 3);
+                if (currentTime >= record.endTime()) {
+                    level.setBlock(pos, record.originalState(), 3);
 
                     RandomSource random = level.getRandom();
                     for (int i = 0; i < 3; i++) {
@@ -113,12 +122,15 @@ public class PassiveEvents {
                                 1, 0, 0, 0, 0);
                     }
 
-                    iterator.remove();
+                    data = data.withoutConversion(pos);
+                    changed = true;
                 }
             }
-        }
 
-        private record ConversionRecord(BlockState originalState, long endTime) {}
+            if (changed) {
+                SoulConversionDataAttachment.setData(level, data);
+            }
+        }
     }
 
     public static class FaintSpiritEvent extends CatamountEvent {

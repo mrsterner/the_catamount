@@ -37,6 +37,7 @@ public class SoulConversionListener {
 
         @Override
         protected void apply(Map<ResourceLocation, JsonElement> object, ResourceManager resourceManager, ProfilerFiller profiler) {
+            CONVERSION_PAIR.clear();
             for (Map.Entry<ResourceLocation, JsonElement> entry : object.entrySet()) {
                 ResourceLocation file = entry.getKey();
                 JsonElement element = entry.getValue();

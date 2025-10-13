@@ -1,7 +1,7 @@
 package dev.sterner.the_catamount.data_attachment.neoforge;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
-import dev.sterner.the_catamount.neoforge.TCDataAttachmentsNeoForge;
+import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsNeoForge;
 import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;

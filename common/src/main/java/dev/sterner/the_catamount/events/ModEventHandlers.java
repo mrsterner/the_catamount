@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 public class ModEventHandlers {
 
@@ -21,7 +22,9 @@ public class ModEventHandlers {
     }
 
     public static void onServerLevelTick(ServerLevel level) {
-        PassiveEvents.SoulFireConversionEvent.tickConversions(level);
+        if (level.dimension() == Level.OVERWORLD) {
+            PassiveEvents.SoulFireConversionEvent.tickConversions(level);
+        }
     }
 
     public static float onLivingDamage(LivingEntity entity, DamageSource source, float amount) {

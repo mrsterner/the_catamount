@@ -1,13 +1,17 @@
 package dev.sterner.the_catamount.fabric;
 
 import dev.sterner.the_catamount.TheCatamount;
+import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsFabric;
 import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
+import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
 import dev.sterner.the_catamount.registry.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -26,19 +30,22 @@ public class TheCatamountFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         TheCatamount.init();
+        TCDataAttachmentsFabric.init();
+        Registry.register(BuiltInRegistries.ITEM, "beast_ivory", TCItems.BEAST_IVORY);
+        Registry.register(BuiltInRegistries.ITEM, "white_ash", TCItems.WHITE_ASH);
+        Registry.register(BuiltInRegistries.ITEM, "bone_heap", TCItems.BONE_HEAP);
 
-        Registry.register(BuiltInRegistries.ITEM, TheCatamount.MOD_ID, TCItems.BEAST_IVORY);
-        Registry.register(BuiltInRegistries.ITEM, TheCatamount.MOD_ID, TCItems.WHITE_ASH);
-        Registry.register(BuiltInRegistries.ITEM, TheCatamount.MOD_ID, TCItems.BONE_HEAP);
+        Registry.register(BuiltInRegistries.BLOCK, "white_ash", TCBlocks.WHITE_ASH);
+        Registry.register(BuiltInRegistries.BLOCK, "bone_heap", TCBlocks.BONE_HEAP);
 
-        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.MOD_ID, TCBlocks.WHITE_ASH);
-        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.MOD_ID, TCBlocks.BONE_HEAP);
-
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, TheCatamount.MOD_ID, TCEntityTypes.CATAMOUNT);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, "catamount", TCEntityTypes.CATAMOUNT);
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TheCatamount.MOD_ID, new TCCreativeTabs().createMain());
 
         FabricDefaultAttributeRegistry.register(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TheCatamount.id("white_ash_coated"), TCDataComponents.WHITE_ASH_COATED);
+
+
+        ServerTickEvents.END_WORLD_TICK.register(ModEventHandlers::onServerLevelTick);
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new SoulConversionListenerFabric());
 
@@ -47,6 +54,11 @@ public class TheCatamountFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, ctx, selection) -> {
             TCCommands.register(dispatcher);
         });
+
+        PayloadTypeRegistry.playS2C().register(
+                SyncCatamountPlayerDataPayload.ID,
+                SyncCatamountPlayerDataPayload.STREAM_CODEC
+        );
     }
 
     static class SoulConversionListenerFabric extends SoulConversionListener implements IdentifiableResourceReloadListener {

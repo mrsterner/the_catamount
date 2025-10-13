@@ -50,6 +50,8 @@ public abstract class CatamountEvent {
     protected BlockPos getEventLocation(ServerPlayer player) {
         RandomSource random = player.getRandom();
 
+        return player.blockPosition();
+        /*TODO add random when we know this works
         if (random.nextBoolean()) {
             return player.blockPosition().offset(
                     random.nextInt(32) - 16,
@@ -67,6 +69,8 @@ public abstract class CatamountEvent {
                     random.nextInt(32) - 16
             );
         }
+
+         */
     }
 
     protected <T extends Entity> List<T> findNearbyEntities(ServerPlayer player, Class<T> entityClass, double radius) {

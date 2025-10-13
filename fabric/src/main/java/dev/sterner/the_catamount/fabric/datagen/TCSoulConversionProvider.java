@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -21,7 +22,11 @@ public class TCSoulConversionProvider extends FabricCodecDataProvider<SoulConver
 
     @Override
     protected void configure(BiConsumer<ResourceLocation, SoulConversionListener.ConversionData> biConsumer, HolderLookup.Provider provider) {
-
+        makeBlock(biConsumer, Blocks.TORCH, Blocks.SOUL_TORCH);
+        makeBlock(biConsumer, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
+        makeBlock(biConsumer, Blocks.LANTERN, Blocks.SOUL_LANTERN);
+        makeBlock(biConsumer, Blocks.FIRE, Blocks.SOUL_FIRE);
+        makeBlock(biConsumer, Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH);
     }
 
     private void makeBlock(

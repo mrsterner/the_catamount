@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minecraft:block/bone_heap_down",
+    "east": "minecraft:block/bone_heap_east",
+    "north": "minecraft:block/bone_heap_north",
+    "particle": "minecraft:block/bone_heap_particle",
+    "south": "minecraft:block/bone_heap_south",
+    "up": "minecraft:block/bone_heap_up",
+    "west": "minecraft:block/bone_heap_west"
+  }
+}

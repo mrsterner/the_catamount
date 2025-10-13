@@ -1,6 +1,7 @@
 package dev.sterner.the_catamount.neoforge;
 
 import dev.sterner.the_catamount.TheCatamount;
+import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsNeoForge;
 import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
@@ -20,11 +21,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 

@@ -1,3 +1,7 @@
 {
+  "block.minecraft.bone_heap": "Bone Heap",
+  "block.minecraft.white_ash": "White Ash",
+  "entity.minecraft.catamount": "Catamount",
+  "item.minecraft.beast_ivory": "Beast Ivory",
   "itemGroup.the_catamount": "The Catamount"
 }

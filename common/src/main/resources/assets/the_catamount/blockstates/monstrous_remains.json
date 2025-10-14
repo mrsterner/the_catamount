@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,part=core": { "model": "the_catamount:block/monstrous_remains" },
+    "facing=south,part=core": { "model": "the_catamount:block/monstrous_remains", "y": 180 },
+    "facing=west,part=core": { "model": "the_catamount:block/monstrous_remains", "y": 270 },
+    "facing=east,part=core": { "model": "the_catamount:block/monstrous_remains", "y": 90 },
+
+    "facing=north,part=front": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=south,part=front": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=west,part=front": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=east,part=front": { "model": "the_catamount:block/monstrous_invisible" },
+
+    "facing=north,part=back": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=south,part=back": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=west,part=back": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=east,part=back": { "model": "the_catamount:block/monstrous_invisible" },
+
+    "facing=north,part=left": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=south,part=left": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=west,part=left": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=east,part=left": { "model": "the_catamount:block/monstrous_invisible" },
+
+    "facing=north,part=right": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=south,part=right": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=west,part=right": { "model": "the_catamount:block/monstrous_invisible" },
+    "facing=east,part=right": { "model": "the_catamount:block/monstrous_invisible" }
+  }
+}

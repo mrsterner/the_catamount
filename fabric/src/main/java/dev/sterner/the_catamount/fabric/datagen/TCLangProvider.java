@@ -24,6 +24,8 @@ public class TCLangProvider extends FabricLanguageProvider {
         builder.add(TCBlocks.WHITE_ASH, "White Ash");
         builder.add(TCBlocks.SUSPICIOUS_DIRT, "Suspicious Dirt");
         builder.add(TCBlocks.PETROGLYPH, "Petroglyph");
+        builder.add(TCBlocks.MONSTROUS_REMAINS, "Monstrous Remains");
+        builder.add(TCBlocks.MONSTROUS_SKULL, "Monstrous Skull");
 
         builder.add(TCEntityTypes.CATAMOUNT, "Catamount");
     }

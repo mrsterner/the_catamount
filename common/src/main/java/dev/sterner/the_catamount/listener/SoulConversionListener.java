@@ -57,8 +57,8 @@ public class SoulConversionListener {
         }
 
         private void parseJson(JsonObject json, ResourceLocation file) {
-            String blockJson = json.has("fromBlock") ? json.get("fromBlock").getAsString() : null;
-            String targetJson = json.has("toBlock") ? json.get("toBlock").getAsString() : null;
+            String blockJson = json.has("normal") ? json.get("normal").getAsString() : null;
+            String targetJson = json.has("soul") ? json.get("soul").getAsString() : null;
 
             if (blockJson != null && targetJson != null) {
                 ResourceLocation fromId = ResourceLocation.tryParse(blockJson);
@@ -69,8 +69,8 @@ public class SoulConversionListener {
                         .getOrThrow(IllegalArgumentException::new)
                         .getFirst();
 
-                Optional<Block> fromBlock = BuiltInRegistries.BLOCK.getOptional(data.fromBlock);
-                Optional<Block> toBlock = BuiltInRegistries.BLOCK.getOptional(data.toBlock);
+                Optional<Block> fromBlock = BuiltInRegistries.BLOCK.getOptional(data.normal);
+                Optional<Block> toBlock = BuiltInRegistries.BLOCK.getOptional(data.soul);
 
                 if (fromBlock.isPresent() && toBlock.isPresent()) {
                     CONVERSION_PAIR.put(fromBlock.get(), toBlock.get());
@@ -79,12 +79,12 @@ public class SoulConversionListener {
         }
     }
 
-    public record ConversionData(ResourceLocation fromBlock, ResourceLocation toBlock) {
+    public record ConversionData(ResourceLocation normal, ResourceLocation soul) {
 
         public static final Codec<ConversionData> CODEC = RecordCodecBuilder.create(instance ->
                     instance.group(
-                            ResourceLocation.CODEC.fieldOf("fromBlock").forGetter(d -> d.fromBlock),
-                            ResourceLocation.CODEC.fieldOf("toBlock").forGetter(d -> d.toBlock)
+                            ResourceLocation.CODEC.fieldOf("normal").forGetter(d -> d.normal),
+                            ResourceLocation.CODEC.fieldOf("soul").forGetter(d -> d.soul)
                     ).apply(instance, ConversionData::new)
             );
         }

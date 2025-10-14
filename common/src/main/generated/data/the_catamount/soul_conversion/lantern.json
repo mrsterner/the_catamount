@@ -1,4 +1,4 @@
 {
-  "fromBlock": "minecraft:lantern",
-  "toBlock": "minecraft:soul_lantern"
+  "normal": "minecraft:lantern",
+  "soul": "minecraft:soul_lantern"
 }

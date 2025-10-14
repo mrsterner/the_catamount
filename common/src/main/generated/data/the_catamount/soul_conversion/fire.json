@@ -1,4 +1,4 @@
 {
-  "fromBlock": "minecraft:fire",
-  "toBlock": "minecraft:soul_fire"
+  "normal": "minecraft:fire",
+  "soul": "minecraft:soul_fire"
 }

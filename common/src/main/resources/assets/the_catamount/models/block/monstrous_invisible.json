@@ -1,0 +1,7 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "the_catamount:block/monstrous_skull"
+  },
+  "elements": []
+}

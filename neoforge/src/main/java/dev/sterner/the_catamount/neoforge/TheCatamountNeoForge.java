@@ -49,13 +49,19 @@ public class TheCatamountNeoForge {
         ITEMS.register("suspicious_dirt", () -> TCItems.SUSPICIOUS_DIRT);
         ITEMS.register("petroglyph", () -> TCItems.PETROGLYPH);
 
+        ITEMS.register("monstrous_remains", () -> TCItems.MONSTROUS_REMAINS);
+        ITEMS.register("monstrous_skull", () -> TCItems.MONSTROUS_SKULL);
+
         BLOCKS.register("white_ash", () -> TCBlocks.WHITE_ASH);
         BLOCKS.register("bone_heap", () -> TCBlocks.BONE_HEAP);
         BLOCKS.register("suspicious_dirt", () -> TCBlocks.SUSPICIOUS_DIRT);
         BLOCKS.register("petroglyph", () -> TCBlocks.PETROGLYPH);
+        BLOCKS.register("monstrous_remains", () -> TCBlocks.MONSTROUS_REMAINS);
+        BLOCKS.register("monstrous_skull", () -> TCBlocks.MONSTROUS_SKULL);
 
         DATAS.register("white_ash_coated", () -> TCDataComponents.WHITE_ASH_COATED);
         BLOCK_ENTITY_TYPES.register("suspicious_dirt", () -> TCBlockEntityTypes.SUSPICIOUS_DIRT);
+        BLOCK_ENTITY_TYPES.register("monstrous_remains", () -> TCBlockEntityTypes.MONSTROUS_REMAINS);
 
         TCDataAttachmentsNeoForge.ATTACHMENT_TYPES.register(eventBus);
         ENTITY_TYPES.register(eventBus);

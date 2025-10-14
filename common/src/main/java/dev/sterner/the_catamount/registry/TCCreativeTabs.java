@@ -17,6 +17,8 @@ public class TCCreativeTabs {
                     output.accept(TCItems.PETROGLYPH);
                     output.accept(TCItems.BONE_HEAP);
                     output.accept(TCItems.WHITE_ASH);
+                    output.accept(TCItems.MONSTROUS_REMAINS);
+                    output.accept(TCItems.MONSTROUS_SKULL);
 
                 }).build();
     }

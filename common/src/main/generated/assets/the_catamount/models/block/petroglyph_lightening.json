@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "the_catamount:block/lightning_petroglyph"
+    "all": "the_catamount:block/lightening_petroglyph"
   }
 }

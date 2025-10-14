@@ -6,8 +6,8 @@
     "type=devour": {
       "model": "the_catamount:block/petroglyph_devour"
     },
-    "type=lightning": {
-      "model": "the_catamount:block/petroglyph_lightning"
+    "type=lightening": {
+      "model": "the_catamount:block/petroglyph_lightening"
     },
     "type=slain": {
       "model": "the_catamount:block/petroglyph_slain"

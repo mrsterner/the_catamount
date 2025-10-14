@@ -11,4 +11,8 @@ public class TCItems {
     public static final Item SUSPICIOUS_DIRT = new BlockItem(TCBlocks.SUSPICIOUS_DIRT, new Item.Properties());
     public static final Item PETROGLYPH = new BlockItem(TCBlocks.PETROGLYPH, new Item.Properties());
 
+
+    public static final Item MONSTROUS_REMAINS = new BlockItem(TCBlocks.MONSTROUS_REMAINS, new Item.Properties());
+    public static final Item MONSTROUS_SKULL = new BlockItem(TCBlocks.MONSTROUS_SKULL, new Item.Properties());
+
 }

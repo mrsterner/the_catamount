@@ -37,7 +37,7 @@ public class PetroglyphBlock extends Block {
     public enum Type implements StringRepresentable {
         AWAKEN,
         DEVOUR,
-        LIGHTNING,
+        LIGHTENING,
         SLAIN;
 
         @Override

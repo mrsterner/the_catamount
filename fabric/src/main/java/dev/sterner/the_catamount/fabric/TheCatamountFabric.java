@@ -37,13 +37,19 @@ public class TheCatamountFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("suspicious_dirt"), TCItems.SUSPICIOUS_DIRT);
         Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("petroglyph"), TCItems.PETROGLYPH);
 
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("monstrous_remains"), TCItems.MONSTROUS_REMAINS);
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("monstrous_skull"), TCItems.MONSTROUS_SKULL);
+
         Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("white_ash"), TCBlocks.WHITE_ASH);
         Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("bone_heap"), TCBlocks.BONE_HEAP);
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("suspicious_dirt"), TCBlocks.SUSPICIOUS_DIRT);
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("petroglyph"), TCBlocks.PETROGLYPH);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("monstrous_remains"), TCBlocks.MONSTROUS_REMAINS);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("monstrous_skull"), TCBlocks.MONSTROUS_SKULL);
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("catamount"), TCEntityTypes.CATAMOUNT);
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,  TheCatamount.id("suspicious_dirt"), TCBlockEntityTypes.SUSPICIOUS_DIRT);
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,  TheCatamount.id("monstrous_remains"), TCBlockEntityTypes.MONSTROUS_REMAINS);
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TheCatamount.MOD_ID, new TCCreativeTabs().createMain());
 
         FabricDefaultAttributeRegistry.register(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );

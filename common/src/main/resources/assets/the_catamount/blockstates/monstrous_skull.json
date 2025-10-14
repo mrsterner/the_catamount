@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "the_catamount:block/monstrous_skull" },
+    "facing=south": { "model": "the_catamount:block/monstrous_skull", "y": 180 },
+    "facing=west": { "model": "the_catamount:block/monstrous_skull", "y": 270 },
+    "facing=east": { "model": "the_catamount:block/monstrous_skull", "y": 90 }
+  }
+}

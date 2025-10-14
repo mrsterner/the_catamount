@@ -1,4 +1,4 @@
 {
-  "fromBlock": "minecraft:wall_torch",
-  "toBlock": "minecraft:soul_wall_torch"
+  "normal": "minecraft:wall_torch",
+  "soul": "minecraft:soul_wall_torch"
 }

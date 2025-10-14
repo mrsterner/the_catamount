@@ -31,19 +31,21 @@ public class TheCatamountFabric implements ModInitializer {
     public void onInitialize() {
         TheCatamount.init();
         TCDataAttachmentsFabric.init();
-        Registry.register(BuiltInRegistries.ITEM, "beast_ivory", TCItems.BEAST_IVORY);
-        Registry.register(BuiltInRegistries.ITEM, "white_ash", TCItems.WHITE_ASH);
-        Registry.register(BuiltInRegistries.ITEM, "bone_heap", TCItems.BONE_HEAP);
+        Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("beast_ivory"), TCItems.BEAST_IVORY);
+        Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("white_ash"), TCItems.WHITE_ASH);
+        Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("bone_heap"), TCItems.BONE_HEAP);
+        Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("suspicious_dirt"), TCItems.SUSPICIOUS_DIRT);
 
-        Registry.register(BuiltInRegistries.BLOCK, "white_ash", TCBlocks.WHITE_ASH);
-        Registry.register(BuiltInRegistries.BLOCK, "bone_heap", TCBlocks.BONE_HEAP);
+        Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("white_ash"), TCBlocks.WHITE_ASH);
+        Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("bone_heap"), TCBlocks.BONE_HEAP);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("suspicious_dirt"), TCBlocks.SUSPICIOUS_DIRT);
 
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, "catamount", TCEntityTypes.CATAMOUNT);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("catamount"), TCEntityTypes.CATAMOUNT);
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,  TheCatamount.id("suspicious_dirt"), TCBlockEntityTypes.SUSPICIOUS_DIRT);
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TheCatamount.MOD_ID, new TCCreativeTabs().createMain());
 
         FabricDefaultAttributeRegistry.register(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TheCatamount.id("white_ash_coated"), TCDataComponents.WHITE_ASH_COATED);
-
 
         ServerTickEvents.END_WORLD_TICK.register(ModEventHandlers::onServerLevelTick);
 

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/white_ash"
+    "layer0": "the_catamount:item/beast_ivory"
   }
 }

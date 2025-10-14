@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -34,6 +35,7 @@ public class TheCatamountNeoForge {
     private final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, TheCatamount.MOD_ID);
     private final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, TheCatamount.MOD_ID);
     private final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, TheCatamount.MOD_ID);
+    private final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, TheCatamount.MOD_ID);
     private final DeferredRegister<DataComponentType<?>> DATAS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, TheCatamount.MOD_ID);
 
 
@@ -44,17 +46,21 @@ public class TheCatamountNeoForge {
         ITEMS.register("beast_ivory", () -> TCItems.BEAST_IVORY);
         ITEMS.register("white_ash", () -> TCItems.WHITE_ASH);
         ITEMS.register("bone_heap", () -> TCItems.BONE_HEAP);
+        ITEMS.register("bone_heap", () -> TCItems.SUSPICIOUS_DIRT);
 
         BLOCKS.register("white_ash", () -> TCBlocks.WHITE_ASH);
         BLOCKS.register("bone_heap", () -> TCBlocks.BONE_HEAP);
+        BLOCKS.register("suspicious_dirt", () -> TCBlocks.SUSPICIOUS_DIRT);
 
         DATAS.register("white_ash_coated", () -> TCDataComponents.WHITE_ASH_COATED);
+        BLOCK_ENTITY_TYPES.register("suspicious_dirt", () -> TCBlockEntityTypes.SUSPICIOUS_DIRT);
 
         TCDataAttachmentsNeoForge.ATTACHMENT_TYPES.register(eventBus);
         ENTITY_TYPES.register(eventBus);
         DATAS.register(eventBus);
         ITEMS.register(eventBus);
         BLOCKS.register(eventBus);
+        BLOCK_ENTITY_TYPES.register(eventBus);
         CREATIVE_TABS.register(eventBus);
         TheCatamount.init();
 

@@ -13,6 +13,7 @@ public class TCCreativeTabs {
                 .icon(() -> new ItemStack(TCItems.BEAST_IVORY))
                 .displayItems((itemDisplayParameters, output) -> {
                     output.accept(TCItems.BEAST_IVORY);
+                    output.accept(TCItems.SUSPICIOUS_DIRT);
                     output.accept(TCItems.BONE_HEAP);
                     output.accept(TCItems.WHITE_ASH);
 

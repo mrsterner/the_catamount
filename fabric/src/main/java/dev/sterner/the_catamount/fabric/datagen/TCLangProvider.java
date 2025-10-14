@@ -22,6 +22,7 @@ public class TCLangProvider extends FabricLanguageProvider {
 
         builder.add(TCBlocks.BONE_HEAP, "Bone Heap");
         builder.add(TCBlocks.WHITE_ASH, "White Ash");
+        builder.add(TCBlocks.SUSPICIOUS_DIRT, "Suspicious Dirt");
 
         builder.add(TCEntityTypes.CATAMOUNT, "Catamount");
     }

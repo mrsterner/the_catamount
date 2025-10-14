@@ -46,11 +46,13 @@ public class TheCatamountNeoForge {
         ITEMS.register("beast_ivory", () -> TCItems.BEAST_IVORY);
         ITEMS.register("white_ash", () -> TCItems.WHITE_ASH);
         ITEMS.register("bone_heap", () -> TCItems.BONE_HEAP);
-        ITEMS.register("bone_heap", () -> TCItems.SUSPICIOUS_DIRT);
+        ITEMS.register("suspicious_dirt", () -> TCItems.SUSPICIOUS_DIRT);
+        ITEMS.register("petroglyph", () -> TCItems.PETROGLYPH);
 
         BLOCKS.register("white_ash", () -> TCBlocks.WHITE_ASH);
         BLOCKS.register("bone_heap", () -> TCBlocks.BONE_HEAP);
         BLOCKS.register("suspicious_dirt", () -> TCBlocks.SUSPICIOUS_DIRT);
+        BLOCKS.register("petroglyph", () -> TCBlocks.PETROGLYPH);
 
         DATAS.register("white_ash_coated", () -> TCDataComponents.WHITE_ASH_COATED);
         BLOCK_ENTITY_TYPES.register("suspicious_dirt", () -> TCBlockEntityTypes.SUSPICIOUS_DIRT);

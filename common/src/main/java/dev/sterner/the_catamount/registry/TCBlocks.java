@@ -1,5 +1,6 @@
 package dev.sterner.the_catamount.registry;
 
+import dev.sterner.the_catamount.block.PetroglyphBlock;
 import dev.sterner.the_catamount.block.SuspiciousDirtBlock;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +24,9 @@ public class TCBlocks {
             .sound(SoundType.SAND)
     );
 
+    public static final Block PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
+            .sound(SoundType.STONE)
+    );
 
     public static final Block SUSPICIOUS_DIRT = new SuspiciousDirtBlock(Blocks.DIRT, SoundEvents.BRUSH_GRAVEL, SoundEvents.BRUSH_GRAVEL_COMPLETED, BlockBehaviour.Properties.of()
             .mapColor(MapColor.DIRT)

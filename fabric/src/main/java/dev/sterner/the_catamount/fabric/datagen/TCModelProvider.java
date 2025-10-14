@@ -1,5 +1,7 @@
 package dev.sterner.the_catamount.fabric.datagen;
 
+import dev.sterner.the_catamount.TheCatamount;
+import dev.sterner.the_catamount.block.PetroglyphBlock;
 import dev.sterner.the_catamount.registry.TCBlocks;
 import dev.sterner.the_catamount.registry.TCItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -10,12 +12,12 @@ import net.minecraft.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.data.models.blockstates.Variant;
 import net.minecraft.data.models.blockstates.VariantProperties;
+import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplates;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class TCModelProvider extends FabricModelProvider {
     public TCModelProvider(FabricDataOutput output) {
@@ -26,12 +28,41 @@ public class TCModelProvider extends FabricModelProvider {
     public void generateBlockStateModels(BlockModelGenerators generators) {
         generators.createGenericCube(TCBlocks.BONE_HEAP);
         generators.createBrushableBlock(TCBlocks.SUSPICIOUS_DIRT);
+        this.createPetroglyphBlock(generators, TCBlocks.PETROGLYPH);
     }
-
 
     @Override
     public void generateItemModels(ItemModelGenerators generators) {
         generators.generateFlatItem(TCItems.BEAST_IVORY, ModelTemplates.FLAT_ITEM);
         generators.generateFlatItem(TCItems.WHITE_ASH, ModelTemplates.FLAT_ITEM);
+    }
+
+    public void createPetroglyphBlock(BlockModelGenerators generators, Block block) {
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(block)
+                .with(PropertyDispatch.property(PetroglyphBlock.TYPE)
+                        .generate(type -> {
+
+                            String textureName = type.getSerializedName() + "_petroglyph";
+                            ResourceLocation texture = TheCatamount.id("block/" + textureName);
+
+                            TextureMapping mapping = new TextureMapping()
+                                    .put(TextureSlot.ALL, texture);
+
+                            ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(block, "_" + type.getSerializedName());
+
+                            ModelTemplates.CUBE_ALL.create(
+                                    modelLocation,
+                                    mapping,
+                                    generators.modelOutput
+                            );
+
+                            return Variant.variant()
+                                    .with(VariantProperties.MODEL, modelLocation);
+                        }));
+
+        generators.blockStateOutput.accept(generator);
+
+        ResourceLocation itemModelLocation = ModelLocationUtils.getModelLocation(block, "_awaken");
+        generators.delegateItemModel(block, itemModelLocation);
     }
 }

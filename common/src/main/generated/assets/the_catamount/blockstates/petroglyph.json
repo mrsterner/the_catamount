@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "type=awaken": {
+      "model": "the_catamount:block/petroglyph_awaken"
+    },
+    "type=devour": {
+      "model": "the_catamount:block/petroglyph_devour"
+    },
+    "type=lightning": {
+      "model": "the_catamount:block/petroglyph_lightning"
+    },
+    "type=slain": {
+      "model": "the_catamount:block/petroglyph_slain"
+    }
+  }
+}

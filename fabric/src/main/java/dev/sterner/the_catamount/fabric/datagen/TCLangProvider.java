@@ -3,6 +3,7 @@ package dev.sterner.the_catamount.fabric.datagen;
 import dev.sterner.the_catamount.registry.TCBlocks;
 import dev.sterner.the_catamount.registry.TCEntityTypes;
 import dev.sterner.the_catamount.registry.TCItems;
+import dev.sterner.the_catamount.registry.TCMobEffects;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.core.HolderLookup;
@@ -28,5 +29,10 @@ public class TCLangProvider extends FabricLanguageProvider {
         builder.add(TCBlocks.MONSTROUS_SKULL, "Monstrous Skull");
 
         builder.add(TCEntityTypes.CATAMOUNT, "Catamount");
+        builder.add(TCEntityTypes.WIND, "Wind");
+        builder.add(TCEntityTypes.DEVOURED, "Devoured");
+        builder.add(TCEntityTypes.LIGHT_ORB, "Light Orb");
+
+        builder.add(TCMobEffects.BLEEDING.value(), "Bleeding");
     }
 }

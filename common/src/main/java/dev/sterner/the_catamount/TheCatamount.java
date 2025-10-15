@@ -1,6 +1,7 @@
 package dev.sterner.the_catamount;
 
 import com.mojang.logging.LogUtils;
+import dev.sterner.the_catamount.registry.TCMobEffects;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -10,8 +11,7 @@ public class TheCatamount {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static void init() {
-
-
+        TCMobEffects.init();
     }
 
     public static ResourceLocation id(String path) {

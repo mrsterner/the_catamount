@@ -15,15 +15,15 @@ public class ModEventHandlers {
 
     public static void onServerTickPlayer(ServerPlayer player) {
         CatamountPlayerDataAttachment.tick(player);
-
         CatamountEventHandler.tick(player);
-
         DamagingEvents.DangerousLeavesEvent.tickDangerousLeaves(player);
     }
 
     public static void onServerLevelTick(ServerLevel level) {
         if (level.dimension() == Level.OVERWORLD) {
             PassiveEvents.SoulFireConversionEvent.tickConversions(level);
+            PassiveEvents.AnimalStareEvent.tickFrozenAnimals(level);
+            PassiveEvents.PaleAnimalsEvent.tickPaleAnimals(level);
         }
     }
 

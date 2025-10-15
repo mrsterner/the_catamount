@@ -1,7 +1,7 @@
 package dev.sterner.the_catamount.data_attachment.neoforge;
 
 import dev.sterner.the_catamount.data_attachment.SoulConversionDataAttachment;
-import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsNeoForge;
+import dev.sterner.the_catamount.neoforge.TCDataAttachmentsNeoForge;
 import net.minecraft.server.level.ServerLevel;
 
 public class SoulConversionDataAttachmentImpl {

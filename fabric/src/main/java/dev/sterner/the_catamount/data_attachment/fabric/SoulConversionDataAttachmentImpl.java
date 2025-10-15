@@ -7,8 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 public class SoulConversionDataAttachmentImpl {
 
     public static SoulConversionDataAttachment.Data getData(ServerLevel level) {
-        SoulConversionDataAttachment.Data data = level.getAttachedOrCreate(TCDataAttachmentsFabric.SOUL_CONVERSION_ATTACHMENT);
-        return data;
+        return level.getAttachedOrCreate(TCDataAttachmentsFabric.SOUL_CONVERSION_ATTACHMENT);
     }
 
     public static void setData(ServerLevel level, SoulConversionDataAttachment.Data data) {

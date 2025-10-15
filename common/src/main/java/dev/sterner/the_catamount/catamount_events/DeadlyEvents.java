@@ -2,9 +2,9 @@ package dev.sterner.the_catamount.catamount_events;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
 import dev.sterner.the_catamount.entity.CatamountEntity;
+import dev.sterner.the_catamount.entity.WindEntity;
 import dev.sterner.the_catamount.registry.TCBlocks;
 import dev.sterner.the_catamount.registry.TCEntityTypes;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -95,6 +95,7 @@ public class DeadlyEvents {
         public void execute(ServerPlayer player) {
             RandomSource random = player.getRandom();
             int gustCount = 3 + random.nextInt(3);
+            ServerLevel level = player.serverLevel();
 
             for (int i = 0; i < gustCount; i++) {
                 BlockPos gustPos = player.blockPosition().offset(
@@ -103,8 +104,16 @@ public class DeadlyEvents {
                         random.nextInt(16) - 8
                 );
 
-                //TODO Spawn wind entity
+                WindEntity wind = new WindEntity(TCEntityTypes.WIND, level);
+                wind.setPos(gustPos.getX() + 0.5, gustPos.getY(), gustPos.getZ() + 0.5);
+                wind.setAggressive(true);
+                wind.setTargetPlayer(player.getUUID());
+
+                level.addFreshEntity(wind);
             }
+
+            level.playSound(null, player.blockPosition(), SoundEvents.BREEZE_WIND_CHARGE_BURST.value(),
+                    SoundSource.HOSTILE, 1.5f, 0.7f);
         }
     }
 

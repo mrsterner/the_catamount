@@ -1,27 +1,36 @@
 package dev.sterner.the_catamount.fabric;
 
 import dev.sterner.the_catamount.TheCatamount;
+import dev.sterner.the_catamount.data_attachment.PaleAnimalDataAttachment;
 import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsFabric;
 import dev.sterner.the_catamount.entity.CatamountEntity;
+import dev.sterner.the_catamount.entity.DevouredEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
+import dev.sterner.the_catamount.payload.EventTriggeredPayload;
+import dev.sterner.the_catamount.payload.PaleAnimalSyncPayload;
 import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
+import dev.sterner.the_catamount.payload.SyncPaleAnimalDataPayload;
 import dev.sterner.the_catamount.registry.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -48,11 +57,15 @@ public class TheCatamountFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("monstrous_skull"), TCBlocks.MONSTROUS_SKULL);
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("catamount"), TCEntityTypes.CATAMOUNT);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("devoured"), TCEntityTypes.DEVOURED);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("wind"), TCEntityTypes.WIND);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE,  TheCatamount.id("light_orb"), TCEntityTypes.LIGHT_ORB);
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,  TheCatamount.id("suspicious_dirt"), TCBlockEntityTypes.SUSPICIOUS_DIRT);
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,  TheCatamount.id("monstrous_remains"), TCBlockEntityTypes.MONSTROUS_REMAINS);
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TheCatamount.MOD_ID, new TCCreativeTabs().createMain());
 
         FabricDefaultAttributeRegistry.register(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );
+        FabricDefaultAttributeRegistry.register(TCEntityTypes.DEVOURED, DevouredEntity.createAttributes().build() );
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TheCatamount.id("white_ash_coated"), TCDataComponents.WHITE_ASH_COATED);
 
         ServerTickEvents.END_WORLD_TICK.register(ModEventHandlers::onServerLevelTick);
@@ -69,6 +82,29 @@ public class TheCatamountFabric implements ModInitializer {
                 SyncCatamountPlayerDataPayload.ID,
                 SyncCatamountPlayerDataPayload.STREAM_CODEC
         );
+
+        PayloadTypeRegistry.playS2C().register(
+                SyncPaleAnimalDataPayload.ID,
+                SyncPaleAnimalDataPayload.STREAM_CODEC
+        );
+
+        PayloadTypeRegistry.playS2C().register(
+                PaleAnimalSyncPayload.ID,
+                PaleAnimalSyncPayload.STREAM_CODEC
+        );
+
+        PayloadTypeRegistry.playS2C().register(
+                EventTriggeredPayload.ID,
+                EventTriggeredPayload.STREAM_CODEC
+        );
+
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayer player = handler.getPlayer();
+            ServerLevel level = player.serverLevel();
+
+            PaleAnimalDataAttachment.Data paleData = PaleAnimalDataAttachment.getData(level);
+            PaleAnimalDataAttachment.sync(level, paleData, List.of(player));
+        });
     }
 
     static class SoulConversionListenerFabric extends SoulConversionListener implements IdentifiableResourceReloadListener {

@@ -1,11 +1,15 @@
 package dev.sterner.the_catamount.catamount_events;
 
+import dev.sterner.the_catamount.PlatformHelper;
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
+import dev.sterner.the_catamount.payload.EventTriggeredPayload;
+import dev.sterner.the_catamount.registry.TCMobEffects;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
@@ -155,7 +159,18 @@ public class CatamountEventHandler {
         for (int i = 0; i < Math.min(count, validEvents.size()); i++) {
             CatamountEvent event = validEvents.get(i);
             event.execute(player);
+
+            String eventName = getEventName(event);
+            EventTriggeredPayload payload = new EventTriggeredPayload(eventName);
+            PlatformHelper.sendPayloadToPlayer(player, payload);
         }
+    }
+
+    private static String getEventName(CatamountEvent event) {
+        String className = event.getClass().getSimpleName();
+        return className.replace("Event", "")
+                .replaceAll("([A-Z])", " $1")
+                .trim();
     }
 
     private static List<CatamountEvent> getValidEventsForPlayer(ServerPlayer player, CatamountPlayerDataAttachment.Data data) {
@@ -219,6 +234,6 @@ public class CatamountEventHandler {
     }
 
     private static void applyBleeding(ServerPlayer player) {
-        //TODO player.addEffect(new MobEffectInstance(BLEEDING, duration, 0));
+        player.addEffect(new MobEffectInstance(TCMobEffects.BLEEDING, 20 * 4, 0));
     }
 }

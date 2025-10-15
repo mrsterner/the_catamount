@@ -1,18 +1,25 @@
 package dev.sterner.the_catamount.neoforge;
 
 import dev.sterner.the_catamount.TheCatamount;
-import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsNeoForge;
+import dev.sterner.the_catamount.data_attachment.PaleAnimalDataAttachment;
 import dev.sterner.the_catamount.entity.CatamountEntity;
+import dev.sterner.the_catamount.entity.DevouredEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
+import dev.sterner.the_catamount.payload.EventTriggeredPayload;
+import dev.sterner.the_catamount.payload.PaleAnimalSyncPayload;
 import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
+import dev.sterner.the_catamount.payload.SyncPaleAnimalDataPayload;
 import dev.sterner.the_catamount.registry.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -24,9 +31,12 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.List;
 
 @Mod(TheCatamount.MOD_ID)
 public class TheCatamountNeoForge {
@@ -37,11 +47,14 @@ public class TheCatamountNeoForge {
     private final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, TheCatamount.MOD_ID);
     private final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, TheCatamount.MOD_ID);
     private final DeferredRegister<DataComponentType<?>> DATAS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, TheCatamount.MOD_ID);
-
+    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, TheCatamount.MOD_ID);
 
     public TheCatamountNeoForge(IEventBus eventBus) {
         CREATIVE_TABS.register("main", () -> new TCCreativeTabs().createMain());
         ENTITY_TYPES.register("catamount", () -> TCEntityTypes.CATAMOUNT);
+        ENTITY_TYPES.register("devoured", () -> TCEntityTypes.DEVOURED);
+        ENTITY_TYPES.register("wind", () -> TCEntityTypes.WIND);
+        ENTITY_TYPES.register("light_orb", () -> TCEntityTypes.LIGHT_ORB);
 
         ITEMS.register("beast_ivory", () -> TCItems.BEAST_IVORY);
         ITEMS.register("white_ash", () -> TCItems.WHITE_ASH);
@@ -70,6 +83,7 @@ public class TheCatamountNeoForge {
         BLOCKS.register(eventBus);
         BLOCK_ENTITY_TYPES.register(eventBus);
         CREATIVE_TABS.register(eventBus);
+        MOB_EFFECTS.register(eventBus);
         TheCatamount.init();
 
         eventBus.addListener(TheCatamountNeoForge::onRegisterPayloadHandlers);
@@ -79,10 +93,14 @@ public class TheCatamountNeoForge {
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event){
         var registrar = event.registrar("1");
         registrar.playToClient(SyncCatamountPlayerDataPayload.ID, SyncCatamountPlayerDataPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
+        registrar.playToClient(PaleAnimalSyncPayload.ID, PaleAnimalSyncPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
+        registrar.playToClient(SyncPaleAnimalDataPayload.ID, SyncPaleAnimalDataPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
+        registrar.playToClient(EventTriggeredPayload.ID, EventTriggeredPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
     }
 
     public static void onEntityAttribute(EntityAttributeCreationEvent event) {
         event.put(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );
+        event.put(TCEntityTypes.DEVOURED, DevouredEntity.createAttributes().build() );
     }
 
     @EventBusSubscriber(modid = TheCatamount.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
@@ -117,6 +135,15 @@ public class TheCatamountNeoForge {
         public static void onServerLevelTick(LevelTickEvent.Post event) {
             if (event.getLevel() instanceof ServerLevel serverLevel) {
                 ModEventHandlers.onServerLevelTick(serverLevel);
+            }
+        }
+
+        @SubscribeEvent
+        public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+            Level level = event.getEntity().level();
+            if (level instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer player) {
+                PaleAnimalDataAttachment.Data paleData = PaleAnimalDataAttachment.getData(serverLevel);
+                PaleAnimalDataAttachment.sync(serverLevel, paleData, List.of(player));
             }
         }
     }

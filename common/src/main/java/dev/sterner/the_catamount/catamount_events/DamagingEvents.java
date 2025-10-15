@@ -1,6 +1,9 @@
 package dev.sterner.the_catamount.catamount_events;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
+import dev.sterner.the_catamount.data_attachment.DangerousLeavesDataAttachment;
+import dev.sterner.the_catamount.entity.WindEntity;
+import dev.sterner.the_catamount.registry.TCEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,6 +20,7 @@ import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DamagingEvents {
@@ -105,37 +109,78 @@ public class DamagingEvents {
         @Override
         public void execute(ServerPlayer player) {
             BlockPos center = getEventLocation(player);
-            //TODO
+            ServerLevel level = player.serverLevel();
+
+            List<BlockPos> dangerousLeaves = new ArrayList<>();
+
+            for (BlockPos pos : BlockPos.betweenClosed(
+                    center.offset(-10, -5, -10),
+                    center.offset(10, 5, 10)
+            )) {
+                BlockState state = level.getBlockState(pos);
+                if (state.is(BlockTags.LEAVES) && !state.hasBlockEntity()) {
+                    dangerousLeaves.add(pos.immutable());
+                }
+            }
+
+            if (!dangerousLeaves.isEmpty()) {
+                DangerousLeavesDataAttachment.Data data = DangerousLeavesDataAttachment.getData(level);
+                long endTime = level.getGameTime() + DURATION;
+
+                for (BlockPos pos : dangerousLeaves) {
+                    data = data.withDangerousLeaf(pos, endTime);
+                }
+
+                DangerousLeavesDataAttachment.setData(level, data);
+
+                level.sendParticles(ParticleTypes.CRIMSON_SPORE,
+                        center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5,
+                        20, 5.0, 2.0, 5.0, 0.05);
+
+                level.playSound(null, center, SoundEvents.SOUL_ESCAPE.value(),
+                        SoundSource.AMBIENT, 0.8f, 0.6f);
+            }
         }
 
         public static void tickDangerousLeaves(ServerPlayer player) {
             BlockPos playerPos = player.blockPosition();
             ServerLevel level = player.serverLevel();
 
-            for (BlockPos pos : BlockPos.betweenClosed(
-                    playerPos.offset(-3, -3, -3),
-                    playerPos.offset(3, 3, 3)
-            )) {
-                BlockState state = level.getBlockState(pos);
-                if (state.is(BlockTags.LEAVES) && !state.hasBlockEntity()) {
-                    if (level.getGameTime() % 40 == 0) {
-                        float damage = 1.0f + player.getRandom().nextFloat();
+            DangerousLeavesDataAttachment.Data data = DangerousLeavesDataAttachment.getData(level);
+            long currentTime = level.getGameTime();
 
-                        if (player.getHealth() > damage) {
-                            player.hurt(level.damageSources().magic(), damage);
-                            CatamountPlayerDataAttachment.Data data = CatamountPlayerDataAttachment.getData(player);
-                            CatamountPlayerDataAttachment.setData(player, data.addPoints((int) damage));
-                        } else {
-                            player.hurt(level.damageSources().magic(), 0.0f);
+            for (BlockPos pos : new ArrayList<>(data.dangerousLeaves().keySet())) {
+                long endTime = data.dangerousLeaves().get(pos);
+
+                if (currentTime >= endTime) {
+                    data = data.withoutDangerousLeaf(pos);
+                    continue;
+                }
+
+                if (playerPos.distSqr(pos) <= 9) {
+                    BlockState state = level.getBlockState(pos);
+                    if (state.is(BlockTags.LEAVES) && !state.hasBlockEntity()) {
+                        if (level.getGameTime() % 40 == 0) {
+                            float damage = 1.0f + player.getRandom().nextFloat();
+
+                            if (player.getHealth() > damage) {
+                                player.hurt(level.damageSources().magic(), damage);
+                                CatamountPlayerDataAttachment.Data pData = CatamountPlayerDataAttachment.getData(player);
+                                CatamountPlayerDataAttachment.setData(player, pData.addPoints((int) damage));
+                            } else {
+                                player.hurt(level.damageSources().magic(), 0.0f);
+                            }
+
+                            level.sendParticles(ParticleTypes.DAMAGE_INDICATOR,
+                                    player.getX(), player.getY() + 1, player.getZ(),
+                                    5, 0.5, 0.5, 0.5, 0.1);
                         }
-
-                        level.sendParticles(ParticleTypes.DAMAGE_INDICATOR,
-                                player.getX(), player.getY() + 1, player.getZ(),
-                                5, 0.5, 0.5, 0.5, 0.1);
+                        break;
                     }
-                    break;
                 }
             }
+
+            DangerousLeavesDataAttachment.setData(level, data);
         }
     }
 
@@ -147,7 +192,17 @@ public class DamagingEvents {
         @Override
         public void execute(ServerPlayer player) {
             BlockPos location = getEventLocation(player);
-            //TODO Spawn wind entity
+            ServerLevel level = player.serverLevel();
+
+            WindEntity wind = new WindEntity(TCEntityTypes.WIND, level);
+            wind.setPos(location.getX() + 0.5, location.getY(), location.getZ() + 0.5);
+            wind.setAggressive(true);
+            wind.setTargetPlayer(player.getUUID());
+
+            level.addFreshEntity(wind);
+
+            level.playSound(null, location, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(),
+                    SoundSource.HOSTILE, 1.0f, 0.8f);
         }
     }
 }

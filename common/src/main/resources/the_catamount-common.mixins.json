@@ -4,11 +4,14 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
+    "LivingEntityRendererMixin"
   ],
   "mixins": [
     "BaseFireBlockMixin",
     "BrushItemMixin",
     "LightningBoltMixin",
+    "LivingEntityMixin",
+    "MobMixin",
     "ServerPlayerMixin"
   ],
   "injectors": {

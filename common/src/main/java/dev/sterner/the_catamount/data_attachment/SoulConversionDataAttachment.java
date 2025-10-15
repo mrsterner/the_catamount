@@ -11,8 +11,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 public class SoulConversionDataAttachment {
 
     @ExpectPlatform

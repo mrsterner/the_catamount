@@ -1,11 +1,15 @@
 package dev.sterner.the_catamount.block;
 
+import dev.sterner.the_catamount.registry.TCBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -56,5 +60,18 @@ public class MonstrousHeadBlock extends AbstractMonstrousSkeletonBlock implement
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide) {
+            return null;
+        }
+
+        if (type == TCBlockEntityTypes.MONSTROUS_REMAINS) {
+            return (BlockEntityTicker<T>) (BlockEntityTicker<MonstrousHeadBlockEntity>) MonstrousHeadBlockEntity::tick;
+        }
+
+        return null;
     }
 }

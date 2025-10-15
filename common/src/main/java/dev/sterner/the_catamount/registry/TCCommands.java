@@ -63,7 +63,7 @@ public class TCCommands {
                                             ServerPlayer player = context.getSource().getPlayerOrException();
                                             int count = IntegerArgumentType.getInteger(context, "count");
                                             DebugUsage.debugTriggerBatch(player, count);
-                                            player.sendSystemMessage(Component.literal("Triggered " + count + " events!")
+                                            player.sendSystemMessage(Component.literal("Triggered " + count + " events")
                                                     .withStyle(ChatFormatting.GREEN));
                                             return 1;
                                         })
@@ -76,7 +76,7 @@ public class TCCommands {
                                             ServerPlayer player = context.getSource().getPlayerOrException();
                                             int stage = IntegerArgumentType.getInteger(context, "stage");
                                             DebugUsage.debugSpawnCatamount(player, stage);
-                                            player.sendSystemMessage(Component.literal("Spawned stage " + stage + " catamount!")
+                                            player.sendSystemMessage(Component.literal("Spawned stage " + stage + " catamount")
                                                     .withStyle(ChatFormatting.RED));
                                             return 1;
                                         })
@@ -95,6 +95,26 @@ public class TCCommands {
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
                                     DebugUsage.debugSoulFireConversion(player);
+                                    return 1;
+                                })
+                        )
+
+                        .then(Commands.literal("pale")
+                                .executes(context -> {
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                    int count = DebugUsage.debugPaleAnimals(player);
+                                    player.sendSystemMessage(Component.literal("Made " + count + " animals pale")
+                                            .withStyle(ChatFormatting.GRAY));
+                                    return 1;
+                                })
+                        )
+
+                        .then(Commands.literal("freeze")
+                                .executes(context -> {
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                    int count = DebugUsage.debugFreezeAnimals(player);
+                                    player.sendSystemMessage(Component.literal("Froze " + count + " animals")
+                                            .withStyle(ChatFormatting.AQUA));
                                     return 1;
                                 })
                         )
@@ -144,7 +164,7 @@ public class TCCommands {
                                     CatamountPlayerDataAttachment.setData(player,
                                             data.withEventCooldown(0));
 
-                                    player.sendSystemMessage(Component.literal("Cleared event cooldown!")
+                                    player.sendSystemMessage(Component.literal("Cleared event cooldown")
                                             .withStyle(ChatFormatting.GREEN));
                                     return 1;
                                 })
@@ -157,7 +177,7 @@ public class TCCommands {
                                     CatamountPlayerDataAttachment.setData(player,
                                             new CatamountPlayerDataAttachment.Data());
 
-                                    player.sendSystemMessage(Component.literal("Reset all catamount data!")
+                                    player.sendSystemMessage(Component.literal("Reset all catamount data")
                                             .withStyle(ChatFormatting.YELLOW));
                                     return 1;
                                 })
@@ -270,14 +290,38 @@ public class TCCommands {
 
         public static void debugExtraDamage(ServerPlayer player) {
             new PassiveEvents.ExtraDamageEvent().execute(player);
-            player.sendSystemMessage(Component.literal("Extra damage active for 1 minute!")
+            player.sendSystemMessage(Component.literal("Extra damage active for 1 minute")
                     .withStyle(ChatFormatting.GOLD));
         }
 
         public static void debugSoulFireConversion(ServerPlayer player) {
             new PassiveEvents.SoulFireConversionEvent().execute(player);
-            player.sendSystemMessage(Component.literal("Soul fire conversion triggered!")
+            player.sendSystemMessage(Component.literal("Soul fire conversion triggered")
                     .withStyle(ChatFormatting.AQUA));
+        }
+
+        public static int debugPaleAnimals(ServerPlayer player) {
+            PassiveEvents.PaleAnimalsEvent event = new PassiveEvents.PaleAnimalsEvent();
+            event.execute(player);
+
+            List<?> animals = player.level().getEntitiesOfClass(
+                    net.minecraft.world.entity.animal.Animal.class,
+                    player.getBoundingBox().inflate(32.0)
+            );
+
+            return animals.size();
+        }
+
+        public static int debugFreezeAnimals(ServerPlayer player) {
+            PassiveEvents.AnimalStareEvent event = new PassiveEvents.AnimalStareEvent();
+            event.execute(player);
+
+            List<?> animals = player.level().getEntitiesOfClass(
+                    net.minecraft.world.entity.animal.Animal.class,
+                    player.getBoundingBox().inflate(32.0)
+            );
+
+            return animals.size();
         }
     }
 }

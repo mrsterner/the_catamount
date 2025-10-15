@@ -1,16 +1,64 @@
 {
   "variants": {
-    "type=awaken": {
+    "facing=east,type=awaken": {
+      "model": "the_catamount:block/petroglyph_awaken",
+      "y": 270
+    },
+    "facing=east,type=devour": {
+      "model": "the_catamount:block/petroglyph_devour",
+      "y": 270
+    },
+    "facing=east,type=lightening": {
+      "model": "the_catamount:block/petroglyph_lightening",
+      "y": 270
+    },
+    "facing=east,type=slain": {
+      "model": "the_catamount:block/petroglyph_slain",
+      "y": 270
+    },
+    "facing=north,type=awaken": {
+      "model": "the_catamount:block/petroglyph_awaken",
+      "y": 180
+    },
+    "facing=north,type=devour": {
+      "model": "the_catamount:block/petroglyph_devour",
+      "y": 180
+    },
+    "facing=north,type=lightening": {
+      "model": "the_catamount:block/petroglyph_lightening",
+      "y": 180
+    },
+    "facing=north,type=slain": {
+      "model": "the_catamount:block/petroglyph_slain",
+      "y": 180
+    },
+    "facing=south,type=awaken": {
       "model": "the_catamount:block/petroglyph_awaken"
     },
-    "type=devour": {
+    "facing=south,type=devour": {
       "model": "the_catamount:block/petroglyph_devour"
     },
-    "type=lightening": {
+    "facing=south,type=lightening": {
       "model": "the_catamount:block/petroglyph_lightening"
     },
-    "type=slain": {
+    "facing=south,type=slain": {
       "model": "the_catamount:block/petroglyph_slain"
+    },
+    "facing=west,type=awaken": {
+      "model": "the_catamount:block/petroglyph_awaken",
+      "y": 90
+    },
+    "facing=west,type=devour": {
+      "model": "the_catamount:block/petroglyph_devour",
+      "y": 90
+    },
+    "facing=west,type=lightening": {
+      "model": "the_catamount:block/petroglyph_lightening",
+      "y": 90
+    },
+    "facing=west,type=slain": {
+      "model": "the_catamount:block/petroglyph_slain",
+      "y": 90
     }
   }
 }

@@ -6,6 +6,7 @@ import dev.sterner.the_catamount.registry.TCBlocks;
 import dev.sterner.the_catamount.registry.TCItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
+import net.minecraft.core.Direction;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.blockstates.MultiVariantGenerator;
@@ -18,6 +19,7 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class TCModelProvider extends FabricModelProvider {
     public TCModelProvider(FabricDataOutput output) {
@@ -41,16 +43,22 @@ public class TCModelProvider extends FabricModelProvider {
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(block)
                 .with(PropertyDispatch.property(PetroglyphBlock.TYPE)
                         .generate(type -> {
-
                             String textureName = type.getSerializedName() + "_petroglyph";
-                            ResourceLocation texture = TheCatamount.id("block/" + textureName);
+                            ResourceLocation petroglyphTexture = TheCatamount.id("block/" + textureName);
+                            ResourceLocation stoneTexture = ResourceLocation.fromNamespaceAndPath("minecraft", "block/stone");
 
                             TextureMapping mapping = new TextureMapping()
-                                    .put(TextureSlot.ALL, texture);
+                                    .put(TextureSlot.PARTICLE, stoneTexture)
+                                    .put(TextureSlot.NORTH, petroglyphTexture)
+                                    .put(TextureSlot.SOUTH, stoneTexture)
+                                    .put(TextureSlot.EAST, stoneTexture)
+                                    .put(TextureSlot.WEST, stoneTexture)
+                                    .put(TextureSlot.UP, stoneTexture)
+                                    .put(TextureSlot.DOWN, stoneTexture);
 
                             ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(block, "_" + type.getSerializedName());
 
-                            ModelTemplates.CUBE_ALL.create(
+                            ModelTemplates.CUBE.create(
                                     modelLocation,
                                     mapping,
                                     generators.modelOutput
@@ -58,7 +66,12 @@ public class TCModelProvider extends FabricModelProvider {
 
                             return Variant.variant()
                                     .with(VariantProperties.MODEL, modelLocation);
-                        }));
+                        }))
+                .with(PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
+                        .select(Direction.NORTH, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                        .select(Direction.SOUTH, Variant.variant())
+                        .select(Direction.WEST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                        .select(Direction.EAST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)));
 
         generators.blockStateOutput.accept(generator);
 

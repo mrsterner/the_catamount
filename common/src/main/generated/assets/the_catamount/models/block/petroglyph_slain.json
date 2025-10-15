@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "the_catamount:block/slain_petroglyph"
+    "down": "minecraft:block/stone",
+    "east": "minecraft:block/stone",
+    "north": "the_catamount:block/slain_petroglyph",
+    "particle": "minecraft:block/stone",
+    "south": "minecraft:block/stone",
+    "up": "minecraft:block/stone",
+    "west": "minecraft:block/stone"
   }
 }

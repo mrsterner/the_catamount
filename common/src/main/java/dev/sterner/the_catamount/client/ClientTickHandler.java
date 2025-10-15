@@ -7,5 +7,6 @@ public class ClientTickHandler {
     public static void onClientTick() {
         ClientPaleAnimalTracker.tick();
         ClientCatamountConfig.tick();
+        ClientFogEffectTracker.tick();
     }
 }

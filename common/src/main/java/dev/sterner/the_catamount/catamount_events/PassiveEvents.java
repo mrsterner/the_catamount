@@ -8,19 +8,28 @@ import dev.sterner.the_catamount.entity.LightOrbEntity;
 import dev.sterner.the_catamount.entity.WindEntity;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
 import dev.sterner.the_catamount.registry.TCEntityTypes;
+import dev.sterner.the_catamount.registry.TCParticles;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -69,6 +78,91 @@ public class PassiveEvents {
             super(EventType.PASSIVE, false);
         }
 
+        public static void tickConversions(ServerLevel level) {
+            if (level.dimension() != Level.OVERWORLD) {
+                return;
+            }
+
+            SoulConversionDataAttachment.Data data = SoulConversionDataAttachment.getData(level);
+
+            if (data.activeConversions().isEmpty()) return;
+
+            long currentTime = level.getGameTime();
+            boolean changed = false;
+
+            for (Map.Entry<BlockPos, SoulConversionDataAttachment.ConversionRecord> entry :
+                    new ArrayList<>(data.activeConversions().entrySet())) {
+
+                BlockPos pos = entry.getKey();
+                SoulConversionDataAttachment.ConversionRecord record = entry.getValue();
+
+                if (currentTime >= record.endTime()) {
+                    BlockState currentState = level.getBlockState(pos);
+                    Block currentBlock = currentState.getBlock();
+
+                    Block expectedSoulBlock = SoulConversionListener.CONVERSION_PAIR.get(record.originalState().getBlock());
+
+                    if (currentBlock == expectedSoulBlock) {
+                        if (record.originalState().getBlock() instanceof CampfireBlock && record.extraData() != null) {
+                            restoreCampfire(level, pos, record);
+                        } else {
+                            level.setBlock(pos, record.originalState(), 3);
+                        }
+
+                        RandomSource random = level.getRandom();
+                        for (int i = 0; i < 3; i++) {
+                            level.sendParticles(ParticleTypes.SMOKE,
+                                    pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
+                                    pos.getY() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
+                                    pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
+                                    1, 0, 0, 0, 0);
+                        }
+                    }
+
+                    data = data.withoutConversion(pos);
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                SoulConversionDataAttachment.setData(level, data);
+            }
+        }
+
+        private static void restoreCampfire(ServerLevel level, BlockPos pos, SoulConversionDataAttachment.ConversionRecord record) {
+            BlockEntity soulCampfireEntity = level.getBlockEntity(pos);
+            NonNullList<ItemStack> currentItems = NonNullList.create();
+
+            if (soulCampfireEntity instanceof CampfireBlockEntity soulCampfire) {
+                for (int i = 0; i < soulCampfire.getItems().size(); i++) {
+                    ItemStack item = soulCampfire.getItems().get(i);
+                    if (!item.isEmpty()) {
+                        currentItems.add(item.copy());
+                    }
+                }
+            }
+
+            level.setBlock(pos, record.originalState(), 3);
+
+            BlockEntity newBlockEntity = level.getBlockEntity(pos);
+            if (newBlockEntity instanceof CampfireBlockEntity campfire) {
+                if (record.extraData() != null) {
+                    campfire.loadAdditional(record.extraData(), level.registryAccess());
+                }
+
+                for (int i = 0; i < Math.min(currentItems.size(), campfire.getItems().size()); i++) {
+                    ItemStack item = currentItems.get(i);
+                    if (!item.isEmpty()) {
+                        if (!campfire.placeFood(null, item, 1)) {
+                            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), item);
+                        }
+                    }
+                }
+
+                campfire.setChanged();
+            }
+        }
+
         @Override
         public void execute(ServerPlayer player) {
             BlockPos center = getEventLocation(player);
@@ -90,12 +184,27 @@ public class PassiveEvents {
 
                 if (SoulConversionListener.CONVERSION_PAIR.containsKey(block)) {
                     BlockPos immutablePos = pos.immutable();
+
+                    if (block instanceof CampfireBlock) {
+                        if (!state.getValue(CampfireBlock.LIT)) {
+                            continue;
+                        }
+
+                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        if (blockEntity instanceof CampfireBlockEntity campfire) {
+                            data = handleCampfireConversion(level, immutablePos, state, campfire, endTime, data);
+                            foundAny = true;
+                            continue;
+                        }
+                    }
+
                     SoulConversionDataAttachment.ConversionRecord record =
                             new SoulConversionDataAttachment.ConversionRecord(state, endTime);
 
                     data = data.withConversion(immutablePos, record);
+                    SoulConversionDataAttachment.setData(level, data);
+
                     SoulConversionListener.convertBlock(level, immutablePos, block);
-                    foundAny = true;
                 }
             }
 
@@ -106,44 +215,54 @@ public class PassiveEvents {
             }
         }
 
-        public static void tickConversions(ServerLevel level) {
-            if (level.dimension() != Level.OVERWORLD) {
-                return;
-            }
+        private SoulConversionDataAttachment.Data handleCampfireConversion(ServerLevel level, BlockPos pos, BlockState state,
+                                                                           CampfireBlockEntity campfire, long endTime,
+                                                                           SoulConversionDataAttachment.Data data) {
 
-            SoulConversionDataAttachment.Data data = SoulConversionDataAttachment.getData(level);
-
-            if (data.activeConversions().isEmpty()) return;
-
-            long currentTime = level.getGameTime();
-            boolean changed = false;
-
-            for (Map.Entry<BlockPos, SoulConversionDataAttachment.ConversionRecord> entry :
-                    new ArrayList<>(data.activeConversions().entrySet())) {
-
-                BlockPos pos = entry.getKey();
-                SoulConversionDataAttachment.ConversionRecord record = entry.getValue();
-
-                if (currentTime >= record.endTime()) {
-                    level.setBlock(pos, record.originalState(), 3);
-
-                    RandomSource random = level.getRandom();
-                    for (int i = 0; i < 3; i++) {
-                        level.sendParticles(ParticleTypes.SMOKE,
-                                pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
-                                pos.getY() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
-                                pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.5,
-                                1, 0, 0, 0, 0);
-                    }
-
-                    data = data.withoutConversion(pos);
-                    changed = true;
+            NonNullList<ItemStack> items = NonNullList.create();
+            for (int i = 0; i < campfire.getItems().size(); i++) {
+                ItemStack item = campfire.getItems().get(i);
+                if (!item.isEmpty()) {
+                    items.add(item.copy());
                 }
             }
 
-            if (changed) {
-                SoulConversionDataAttachment.setData(level, data);
+            CompoundTag campfireData = new CompoundTag();
+            campfire.saveAdditional(campfireData, level.registryAccess());
+
+            SoulConversionDataAttachment.ConversionRecord record =
+                    new SoulConversionDataAttachment.ConversionRecord(state, endTime, campfireData);
+            data = data.withConversion(pos, record);
+
+            Block targetBlock = SoulConversionListener.CONVERSION_PAIR.get(state.getBlock());
+            if (targetBlock != null) {
+                BlockState newState = SoulConversionListener.copySharedProperties(state, targetBlock.defaultBlockState());
+                level.setBlock(pos, newState, 3);
+
+                BlockEntity newBlockEntity = level.getBlockEntity(pos);
+                if (newBlockEntity instanceof CampfireBlockEntity soulCampfire) {
+
+                    for (int i = 0; i < Math.min(items.size(), soulCampfire.getItems().size()); i++) {
+                        ItemStack item = items.get(i);
+                        if (!item.isEmpty()) {
+                            if (!soulCampfire.placeFood(null, item, 1)) {
+                                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), item);
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    double offsetX = 0.5 + (level.random.nextDouble() - 0.5);
+                    double offsetY = 0.5 + (level.random.nextDouble() - 0.5);
+                    double offsetZ = 0.5 + (level.random.nextDouble() - 0.5);
+                    level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                            pos.getX() + offsetX, pos.getY() + offsetY, pos.getZ() + offsetZ,
+                            1, 0, 0, 0, 0);
+                }
             }
+
+            return data;
         }
     }
 
@@ -157,12 +276,26 @@ public class PassiveEvents {
             BlockPos location = getEventLocation(player);
             ServerLevel level = player.serverLevel();
 
-            BlockPos particlePos = findValidSurface(level, location);
-            if (particlePos == null) return;
+            BlockPos surfacePos = findValidSurface(level, location);
+            if (surfacePos == null) {
+                surfacePos = location;
+            }
 
-            createFaceParticles(level, particlePos);
+            Direction facing = findFacingDirection(level, surfacePos);
 
-            level.playSound(null, particlePos, SoundEvents.SOUL_ESCAPE.value(),
+            Vec3 particlePos = Vec3.atCenterOf(surfacePos).add(
+                    facing.getStepX() * 0.6,
+                    0,
+                    facing.getStepZ() * 0.6
+            );
+
+            level.sendParticles(
+                    TCParticles.SPIRIT_FACE,
+                    particlePos.x, particlePos.y, particlePos.z,
+                    1, 0, 0, 0, 0.0
+            );
+
+            level.playSound(null, surfacePos, SoundEvents.SOUL_ESCAPE.value(),
                     SoundSource.AMBIENT, 0.3f, 0.5f);
         }
 
@@ -183,22 +316,13 @@ public class PassiveEvents {
             return null;
         }
 
-        //TODO Particles is not ideal, texture is better
-        private void createFaceParticles(ServerLevel level, BlockPos pos) {
-            level.sendParticles(ParticleTypes.SOUL,
-                    pos.getX() + 0.3, pos.getY() + 0.7, pos.getZ() + 0.5,
-                    3, 0.05, 0.05, 0.05, 0.0);
-
-            level.sendParticles(ParticleTypes.SOUL,
-                    pos.getX() + 0.7, pos.getY() + 0.7, pos.getZ() + 0.5,
-                    3, 0.05, 0.05, 0.05, 0.0);
-
-            for (double x = 0.3; x <= 0.7; x += 0.1) {
-                double y = 0.4 - Math.abs(x - 0.5) * 0.2;
-                level.sendParticles(ParticleTypes.SOUL,
-                        pos.getX() + x, pos.getY() + y, pos.getZ() + 0.5,
-                        1, 0.02, 0.02, 0.02, 0.0);
+        private Direction findFacingDirection(ServerLevel level, BlockPos pos) {
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                if (level.getBlockState(pos.relative(dir)).isAir()) {
+                    return dir;
+                }
             }
+            return Direction.NORTH;
         }
     }
 

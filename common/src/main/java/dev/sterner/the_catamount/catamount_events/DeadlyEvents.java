@@ -1,8 +1,10 @@
 package dev.sterner.the_catamount.catamount_events;
 
+import dev.sterner.the_catamount.PlatformHelper;
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
 import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.entity.WindEntity;
+import dev.sterner.the_catamount.payload.FogEffectPayload;
 import dev.sterner.the_catamount.registry.TCBlocks;
 import dev.sterner.the_catamount.registry.TCEntityTypes;
 import net.minecraft.core.BlockPos;
@@ -194,11 +196,17 @@ public class DeadlyEvents {
         }
 
         private void applyFogEffect(ServerPlayer player, ServerLevel level, BlockPos center) {
-            // TODO: Implement fog rendering and remove darkness effect
             List<ServerPlayer> nearbyPlayers = level.getEntitiesOfClass(ServerPlayer.class,
                     AABB.ofSize(Vec3.atCenterOf(center), 64, 64, 64));
 
             for (ServerPlayer nearbyPlayer : nearbyPlayers) {
+                FogEffectPayload payload = new FogEffectPayload(
+                        Vec3.atCenterOf(center),
+                        64.0f,
+                        600
+                );
+                PlatformHelper.sendPayloadToPlayer(nearbyPlayer, payload);
+
                 nearbyPlayer.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 600, 0, false, false));
             }
         }

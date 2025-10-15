@@ -4,7 +4,10 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
-    "LivingEntityRendererMixin"
+    "ClientLevelMixin",
+    "FogRendererMixin",
+    "LivingEntityRendererMixin",
+    "OverworldSpecialEffectsMixin"
   ],
   "mixins": [
     "BaseFireBlockMixin",
@@ -12,7 +15,8 @@
     "LightningBoltMixin",
     "LivingEntityMixin",
     "MobMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "SoulFireBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

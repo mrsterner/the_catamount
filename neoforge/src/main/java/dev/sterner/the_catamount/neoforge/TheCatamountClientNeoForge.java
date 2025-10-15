@@ -5,11 +5,9 @@ import dev.sterner.the_catamount.ClientCatamountConfig;
 import dev.sterner.the_catamount.TheCatamount;
 import dev.sterner.the_catamount.client.CatamountHudOverlay;
 import dev.sterner.the_catamount.client.ClientTickHandler;
+import dev.sterner.the_catamount.client.StrugglingSpiritParticle;
 import dev.sterner.the_catamount.client.render.*;
-import dev.sterner.the_catamount.registry.TCBlockEntityTypes;
-import dev.sterner.the_catamount.registry.TCBlocks;
-import dev.sterner.the_catamount.registry.TCEntityTypes;
-import dev.sterner.the_catamount.registry.TCShaders;
+import dev.sterner.the_catamount.registry.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -35,6 +33,14 @@ public class TheCatamountClientNeoForge {
         event.registerEntityRenderer(TCEntityTypes.DEVOURED, DevouredRenderer::new);
         event.registerEntityRenderer(TCEntityTypes.WIND, WindEntityRenderer::new);
         event.registerEntityRenderer(TCEntityTypes.LIGHT_ORB, LightOrbEntityRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(
+                TCParticles.SPIRIT_FACE,
+                StrugglingSpiritParticle.Provider::new
+        );
     }
 
     @SubscribeEvent

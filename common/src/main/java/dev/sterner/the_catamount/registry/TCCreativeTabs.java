@@ -10,7 +10,7 @@ public class TCCreativeTabs {
     public CreativeModeTab createMain(){
         return CreativeModeTab.builder(CreativeModeTab.Row.TOP, 4)
                 .title(Component.translatable("itemGroup.the_catamount"))
-                .icon(() -> new ItemStack(TCItems.BEAST_IVORY))
+                .icon(() -> new ItemStack(TCItems.MONSTROUS_SKULL))
                 .displayItems((itemDisplayParameters, output) -> {
                     output.accept(TCItems.BEAST_IVORY);
                     output.accept(TCItems.SUSPICIOUS_DIRT);

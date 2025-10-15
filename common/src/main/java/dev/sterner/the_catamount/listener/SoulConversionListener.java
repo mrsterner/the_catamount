@@ -37,21 +37,16 @@ public class SoulConversionListener {
 
         @Override
         protected void apply(Map<ResourceLocation, JsonElement> object, ResourceManager resourceManager, ProfilerFiller profiler) {
-            CONVERSION_PAIR.clear();
             for (Map.Entry<ResourceLocation, JsonElement> entry : object.entrySet()) {
                 ResourceLocation file = entry.getKey();
                 JsonElement element = entry.getValue();
 
-                try {
-                    if (element.isJsonArray()) {
-                        for (JsonElement e : element.getAsJsonArray()) {
-                            parseJson(e.getAsJsonObject(), file);
-                        }
-                    } else if (element.isJsonObject()) {
-                        parseJson(element.getAsJsonObject(), file);
+                if (element.isJsonArray()) {
+                    for (JsonElement e : element.getAsJsonArray()) {
+                        parseJson(e.getAsJsonObject(), file);
                     }
-                } catch (Exception e) {
-                    throw new IllegalArgumentException(e.fillInStackTrace());
+                } else if (element.isJsonObject()) {
+                    parseJson(element.getAsJsonObject(), file);
                 }
             }
         }
@@ -63,7 +58,9 @@ public class SoulConversionListener {
             if (blockJson != null && targetJson != null) {
                 ResourceLocation fromId = ResourceLocation.tryParse(blockJson);
                 ResourceLocation toId = ResourceLocation.tryParse(targetJson);
-                if (fromId == null || toId == null) return;
+                if (fromId == null || toId == null) {
+                    return;
+                }
 
                 ConversionData data = ConversionData.CODEC.decode(JsonOps.INSTANCE, json)
                         .getOrThrow(IllegalArgumentException::new)
@@ -89,7 +86,7 @@ public class SoulConversionListener {
             );
         }
 
-    private static BlockState copySharedProperties(BlockState fromState, BlockState toState) {
+    public static BlockState copySharedProperties(BlockState fromState, BlockState toState) {
         for (Property<?> property : fromState.getProperties()) {
             Property<?> targetProperty = toState.getBlock().getStateDefinition().getProperty(property.getName());
             if (targetProperty != null) {

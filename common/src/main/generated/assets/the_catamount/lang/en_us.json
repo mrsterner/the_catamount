@@ -7,6 +7,9 @@
   "block.the_catamount.white_ash": "White Ash",
   "effect.the_catamount.bleeding": "Bleeding",
   "entity.the_catamount.catamount": "Catamount",
+  "entity.the_catamount.devoured": "Devoured",
+  "entity.the_catamount.light_orb": "Light Orb",
+  "entity.the_catamount.wind": "Wind",
   "item.the_catamount.beast_ivory": "Beast Ivory",
   "itemGroup.the_catamount": "The Catamount"
 }

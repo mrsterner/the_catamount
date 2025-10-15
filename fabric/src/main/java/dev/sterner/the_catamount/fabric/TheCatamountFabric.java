@@ -7,11 +7,9 @@ import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.entity.DevouredEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
-import dev.sterner.the_catamount.payload.EventTriggeredPayload;
-import dev.sterner.the_catamount.payload.PaleAnimalSyncPayload;
-import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
-import dev.sterner.the_catamount.payload.SyncPaleAnimalDataPayload;
+import dev.sterner.the_catamount.payload.*;
 import dev.sterner.the_catamount.registry.*;
+import dev.sterner.the_catamount.registry.fabric.TCParticlesFabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -40,6 +38,8 @@ public class TheCatamountFabric implements ModInitializer {
     public void onInitialize() {
         TheCatamount.init();
         TCDataAttachmentsFabric.init();
+        TCParticlesFabric.init();
+
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("beast_ivory"), TCItems.BEAST_IVORY);
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("white_ash"), TCItems.WHITE_ASH);
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("bone_heap"), TCItems.BONE_HEAP);
@@ -96,6 +96,11 @@ public class TheCatamountFabric implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(
                 EventTriggeredPayload.ID,
                 EventTriggeredPayload.STREAM_CODEC
+        );
+
+        PayloadTypeRegistry.playS2C().register(
+                FogEffectPayload.ID,
+                FogEffectPayload.STREAM_CODEC
         );
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

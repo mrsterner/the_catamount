@@ -8,7 +8,7 @@ val geckolibVersion = project.properties["geckolib_version"] as String
 
 loom.accessWidenerPath.set(file("src/main/resources/the_catamount.accesswidener"))
 
-sourceSets.main.get().resources.srcDir("src/main/generated/resources")
+sourceSets.main.get().resources.srcDir("src/main/generated")
 
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")

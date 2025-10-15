@@ -2,9 +2,12 @@ package dev.sterner.the_catamount.catamount_events;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -49,9 +52,8 @@ public abstract class CatamountEvent {
 
     protected BlockPos getEventLocation(ServerPlayer player) {
         RandomSource random = player.getRandom();
+        ServerLevel level = player.serverLevel();
 
-        return player.blockPosition();
-        /*TODO add random when we know this works
         if (random.nextBoolean()) {
             return player.blockPosition().offset(
                     random.nextInt(32) - 16,
@@ -60,17 +62,24 @@ public abstract class CatamountEvent {
             );
         } else {
             BlockPos spawnPoint = player.getRespawnPosition();
-            if (spawnPoint == null) {
-                spawnPoint = player.serverLevel().getSharedSpawnPos();
+            ResourceKey<Level> spawnDimension = player.getRespawnDimension();
+
+            if (spawnPoint != null && spawnDimension == level.dimension()) {
+                return spawnPoint.offset(
+                        random.nextInt(32) - 16,
+                        random.nextInt(16) - 8,
+                        random.nextInt(32) - 16
+                );
+            } else {
+                BlockPos worldSpawn = level.getSharedSpawnPos();
+                return worldSpawn.offset(
+                        random.nextInt(32) - 16,
+                        random.nextInt(16) - 8,
+                        random.nextInt(32) - 16
+                );
             }
-            return spawnPoint.offset(
-                    random.nextInt(32) - 16,
-                    random.nextInt(16) - 8,
-                    random.nextInt(32) - 16
-            );
         }
 
-         */
     }
 
     protected <T extends Entity> List<T> findNearbyEntities(ServerPlayer player, Class<T> entityClass, double radius) {

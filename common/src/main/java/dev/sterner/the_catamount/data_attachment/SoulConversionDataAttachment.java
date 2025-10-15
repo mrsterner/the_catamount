@@ -6,9 +6,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.sterner.the_catamount.TheCatamount;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,12 +78,17 @@ public class SoulConversionDataAttachment {
         public static final ResourceLocation ID = TheCatamount.id("soul_conversion_data");
     }
 
-    public record ConversionRecord(BlockState originalState, long endTime) {
+    public record ConversionRecord(BlockState originalState, long endTime, @Nullable CompoundTag extraData) {
+
+        public ConversionRecord(BlockState originalState, long endTime) {
+            this(originalState, endTime, null);
+        }
 
         public static final Codec<ConversionRecord> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
                         BlockState.CODEC.fieldOf("originalState").forGetter(c -> c.originalState),
-                        Codec.LONG.fieldOf("endTime").forGetter(c -> c.endTime)
+                        Codec.LONG.fieldOf("endTime").forGetter(c -> c.endTime),
+                        CompoundTag.CODEC.optionalFieldOf("extraData", null).forGetter(c -> c.extraData)
                 ).apply(instance, ConversionRecord::new)
         );
     }

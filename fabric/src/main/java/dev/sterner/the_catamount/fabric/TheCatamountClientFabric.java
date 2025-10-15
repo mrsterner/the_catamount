@@ -5,22 +5,18 @@ import dev.sterner.the_catamount.ClientCatamountConfig;
 import dev.sterner.the_catamount.TheCatamount;
 import dev.sterner.the_catamount.client.CatamountHudOverlay;
 import dev.sterner.the_catamount.client.ClientTickHandler;
+import dev.sterner.the_catamount.client.StrugglingSpiritParticle;
 import dev.sterner.the_catamount.client.model.DevouredModel;
 import dev.sterner.the_catamount.client.render.*;
-import dev.sterner.the_catamount.payload.EventTriggeredPayload;
-import dev.sterner.the_catamount.payload.PaleAnimalSyncPayload;
-import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
-import dev.sterner.the_catamount.payload.SyncPaleAnimalDataPayload;
-import dev.sterner.the_catamount.registry.TCBlockEntityTypes;
-import dev.sterner.the_catamount.registry.TCBlocks;
-import dev.sterner.the_catamount.registry.TCEntityTypes;
-import dev.sterner.the_catamount.registry.TCShaders;
+import dev.sterner.the_catamount.payload.*;
+import dev.sterner.the_catamount.registry.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -64,9 +60,18 @@ public class TheCatamountClientFabric implements ClientModInitializer {
             payload.handleS2C();
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(FogEffectPayload.ID, (payload, ctx) -> {
+            payload.handleS2C();
+        });
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ClientTickHandler.onClientTick();
         });
+
+        ParticleFactoryRegistry.getInstance().register(
+                TCParticles.SPIRIT_FACE,
+                StrugglingSpiritParticle.Provider::new
+        );
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(

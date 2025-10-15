@@ -6,11 +6,9 @@ import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.entity.DevouredEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
-import dev.sterner.the_catamount.payload.EventTriggeredPayload;
-import dev.sterner.the_catamount.payload.PaleAnimalSyncPayload;
-import dev.sterner.the_catamount.payload.SyncCatamountPlayerDataPayload;
-import dev.sterner.the_catamount.payload.SyncPaleAnimalDataPayload;
+import dev.sterner.the_catamount.payload.*;
 import dev.sterner.the_catamount.registry.*;
+import dev.sterner.the_catamount.registry.neoforge.TCParticlesNeoForge;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +24,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -85,9 +85,15 @@ public class TheCatamountNeoForge {
         CREATIVE_TABS.register(eventBus);
         MOB_EFFECTS.register(eventBus);
         TheCatamount.init();
+        TCParticlesNeoForge.init(eventBus);
 
+        eventBus.addListener(this::commonSetup);
         eventBus.addListener(TheCatamountNeoForge::onRegisterPayloadHandlers);
         eventBus.addListener(TheCatamountNeoForge::onEntityAttribute);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(TCParticlesNeoForge::assignParticles);
     }
 
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event){
@@ -96,6 +102,7 @@ public class TheCatamountNeoForge {
         registrar.playToClient(PaleAnimalSyncPayload.ID, PaleAnimalSyncPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
         registrar.playToClient(SyncPaleAnimalDataPayload.ID, SyncPaleAnimalDataPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
         registrar.playToClient(EventTriggeredPayload.ID, EventTriggeredPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
+        registrar.playToClient(FogEffectPayload.ID, FogEffectPayload.STREAM_CODEC, (payload, ctx) -> payload.handleS2C());
     }
 
     public static void onEntityAttribute(EntityAttributeCreationEvent event) {
@@ -108,6 +115,7 @@ public class TheCatamountNeoForge {
 
         @SubscribeEvent
         public static void registerListeners(AddReloadListenerEvent event) {
+            TheCatamount.LOGGER.info("Registering SoulConversionListener");
             event.addListener(SoulConversionListener.LOADER);
         }
 

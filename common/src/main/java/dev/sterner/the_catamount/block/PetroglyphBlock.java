@@ -17,11 +17,9 @@ import java.util.Locale;
 
 public class PetroglyphBlock extends HorizontalDirectionalBlock {
 
-    public static final EnumProperty<Type> TYPE = EnumProperty.create("type", Type.class);
-
     public PetroglyphBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(TYPE, Type.AWAKEN).setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
     @Override
@@ -31,31 +29,15 @@ public class PetroglyphBlock extends HorizontalDirectionalBlock {
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        RandomSource random = context.getLevel().getRandom();
-        Type[] types = Type.values();
-        Type randomType = types[random.nextInt(types.length)];
 
         Direction facing = context.getHorizontalDirection();
 
         return this.defaultBlockState()
-                .setValue(TYPE, randomType)
                 .setValue(FACING, facing);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(TYPE, FACING);
-    }
-
-    public enum Type implements StringRepresentable {
-        AWAKEN,
-        DEVOUR,
-        LIGHTENING,
-        SLAIN;
-
-        @Override
-        public String getSerializedName() {
-            return name().toLowerCase(Locale.ROOT);
-        }
+        builder.add(FACING);
     }
 }

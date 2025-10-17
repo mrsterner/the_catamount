@@ -60,7 +60,10 @@ public class TheCatamountNeoForge {
         ITEMS.register("white_ash", () -> TCItems.WHITE_ASH);
         ITEMS.register("bone_heap", () -> TCItems.BONE_HEAP);
         ITEMS.register("suspicious_dirt", () -> TCItems.SUSPICIOUS_DIRT);
-        ITEMS.register("petroglyph", () -> TCItems.PETROGLYPH);
+        ITEMS.register("devour_petroglyph", () -> TCItems.DEVOUR_PETROGLYPH);
+        ITEMS.register("awaken_petroglyph", () -> TCItems.AWAKEN_PETROGLYPH);
+        ITEMS.register("lightening_petroglyph", () -> TCItems.LIGHTENING_PETROGLYPH);
+        ITEMS.register("slain_petroglyph", () -> TCItems.SLAIN_PETROGLYPH);
 
         ITEMS.register("monstrous_remains", () -> TCItems.MONSTROUS_REMAINS);
         ITEMS.register("monstrous_skull", () -> TCItems.MONSTROUS_SKULL);
@@ -68,7 +71,10 @@ public class TheCatamountNeoForge {
         BLOCKS.register("white_ash", () -> TCBlocks.WHITE_ASH);
         BLOCKS.register("bone_heap", () -> TCBlocks.BONE_HEAP);
         BLOCKS.register("suspicious_dirt", () -> TCBlocks.SUSPICIOUS_DIRT);
-        BLOCKS.register("petroglyph", () -> TCBlocks.PETROGLYPH);
+        BLOCKS.register("devour_petroglyph", () -> TCBlocks.DEVOUR_PETROGLYPH);
+        BLOCKS.register("awaken_petroglyph", () -> TCBlocks.AWAKEN_PETROGLYPH);
+        BLOCKS.register("lightening_petroglyph", () -> TCBlocks.LIGHTENING_PETROGLYPH);
+        BLOCKS.register("slain_petroglyph", () -> TCBlocks.SLAIN_PETROGLYPH);
         BLOCKS.register("monstrous_remains", () -> TCBlocks.MONSTROUS_REMAINS);
         BLOCKS.register("monstrous_skull", () -> TCBlocks.MONSTROUS_SKULL);
 

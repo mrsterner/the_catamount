@@ -30,7 +30,12 @@ public class TCModelProvider extends FabricModelProvider {
     public void generateBlockStateModels(BlockModelGenerators generators) {
         generators.createGenericCube(TCBlocks.BONE_HEAP);
         generators.createBrushableBlock(TCBlocks.SUSPICIOUS_DIRT);
-        this.createPetroglyphBlock(generators, TCBlocks.PETROGLYPH);
+
+        // Petroglyphs
+        createPetroglyphBlock(generators, TCBlocks.DEVOUR_PETROGLYPH, "devour");
+        createPetroglyphBlock(generators, TCBlocks.AWAKEN_PETROGLYPH, "awaken");
+        createPetroglyphBlock(generators, TCBlocks.LIGHTENING_PETROGLYPH, "lightening");
+        createPetroglyphBlock(generators, TCBlocks.SLAIN_PETROGLYPH, "slain");
     }
 
     @Override
@@ -39,43 +44,42 @@ public class TCModelProvider extends FabricModelProvider {
         generators.generateFlatItem(TCItems.WHITE_ASH, ModelTemplates.FLAT_ITEM);
     }
 
-    public void createPetroglyphBlock(BlockModelGenerators generators, Block block) {
+    private void createPetroglyphBlock(BlockModelGenerators generators, Block block, String name) {
+        ResourceLocation petroglyphTexture = TheCatamount.id("block/" + name + "_petroglyph");
+        ResourceLocation stoneTexture = ResourceLocation.withDefaultNamespace("block/stone");
+
+        TextureMapping mapping = new TextureMapping()
+                .put(TextureSlot.PARTICLE, stoneTexture)
+                .put(TextureSlot.NORTH, petroglyphTexture)
+                .put(TextureSlot.SOUTH, stoneTexture)
+                .put(TextureSlot.EAST, stoneTexture)
+                .put(TextureSlot.WEST, stoneTexture)
+                .put(TextureSlot.UP, stoneTexture)
+                .put(TextureSlot.DOWN, stoneTexture);
+
+        ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(block);
+
+        ModelTemplates.CUBE.create(modelLocation, mapping, generators.modelOutput);
+
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(block)
-                .with(PropertyDispatch.property(PetroglyphBlock.TYPE)
-                        .generate(type -> {
-                            String textureName = type.getSerializedName() + "_petroglyph";
-                            ResourceLocation petroglyphTexture = TheCatamount.id("block/" + textureName);
-                            ResourceLocation stoneTexture = ResourceLocation.fromNamespaceAndPath("minecraft", "block/stone");
-
-                            TextureMapping mapping = new TextureMapping()
-                                    .put(TextureSlot.PARTICLE, stoneTexture)
-                                    .put(TextureSlot.NORTH, petroglyphTexture)
-                                    .put(TextureSlot.SOUTH, stoneTexture)
-                                    .put(TextureSlot.EAST, stoneTexture)
-                                    .put(TextureSlot.WEST, stoneTexture)
-                                    .put(TextureSlot.UP, stoneTexture)
-                                    .put(TextureSlot.DOWN, stoneTexture);
-
-                            ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(block, "_" + type.getSerializedName());
-
-                            ModelTemplates.CUBE.create(
-                                    modelLocation,
-                                    mapping,
-                                    generators.modelOutput
-                            );
-
-                            return Variant.variant()
-                                    .with(VariantProperties.MODEL, modelLocation);
-                        }))
                 .with(PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
-                        .select(Direction.NORTH, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
-                        .select(Direction.SOUTH, Variant.variant())
-                        .select(Direction.WEST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
-                        .select(Direction.EAST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)));
+                        .select(Direction.NORTH, Variant.variant()
+                                .with(VariantProperties.MODEL, modelLocation)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                        .select(Direction.SOUTH, Variant.variant()
+                                .with(VariantProperties.MODEL, modelLocation))
+                        .select(Direction.WEST, Variant.variant()
+                                .with(VariantProperties.MODEL, modelLocation)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                        .select(Direction.EAST, Variant.variant()
+                                .with(VariantProperties.MODEL, modelLocation)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                );
 
         generators.blockStateOutput.accept(generator);
 
-        ResourceLocation itemModelLocation = ModelLocationUtils.getModelLocation(block, "_awaken");
-        generators.delegateItemModel(block, itemModelLocation);
+        generators.delegateItemModel(block, modelLocation);
     }
+
 }
+

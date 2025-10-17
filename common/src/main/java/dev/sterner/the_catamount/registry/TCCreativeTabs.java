@@ -14,7 +14,10 @@ public class TCCreativeTabs {
                 .displayItems((itemDisplayParameters, output) -> {
                     output.accept(TCItems.BEAST_IVORY);
                     output.accept(TCItems.SUSPICIOUS_DIRT);
-                    output.accept(TCItems.PETROGLYPH);
+                    output.accept(TCItems.DEVOUR_PETROGLYPH);
+                    output.accept(TCItems.AWAKEN_PETROGLYPH);
+                    output.accept(TCItems.LIGHTENING_PETROGLYPH);
+                    output.accept(TCItems.SLAIN_PETROGLYPH);
                     output.accept(TCItems.BONE_HEAP);
                     output.accept(TCItems.WHITE_ASH);
                     output.accept(TCItems.MONSTROUS_REMAINS);

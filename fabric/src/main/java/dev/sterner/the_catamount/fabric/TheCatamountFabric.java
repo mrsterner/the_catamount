@@ -44,7 +44,10 @@ public class TheCatamountFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("white_ash"), TCItems.WHITE_ASH);
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("bone_heap"), TCItems.BONE_HEAP);
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("suspicious_dirt"), TCItems.SUSPICIOUS_DIRT);
-        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("petroglyph"), TCItems.PETROGLYPH);
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("devour_petroglyph"), TCItems.DEVOUR_PETROGLYPH);
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("awaken_petroglyph"), TCItems.AWAKEN_PETROGLYPH);
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("lightening_petroglyph"), TCItems.LIGHTENING_PETROGLYPH);
+        Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("slain_petroglyph"), TCItems.SLAIN_PETROGLYPH);
 
         Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("monstrous_remains"), TCItems.MONSTROUS_REMAINS);
         Registry.register(BuiltInRegistries.ITEM, TheCatamount.id("monstrous_skull"), TCItems.MONSTROUS_SKULL);
@@ -52,7 +55,11 @@ public class TheCatamountFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("white_ash"), TCBlocks.WHITE_ASH);
         Registry.register(BuiltInRegistries.BLOCK,  TheCatamount.id("bone_heap"), TCBlocks.BONE_HEAP);
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("suspicious_dirt"), TCBlocks.SUSPICIOUS_DIRT);
-        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("petroglyph"), TCBlocks.PETROGLYPH);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("devour_petroglyph"), TCBlocks.DEVOUR_PETROGLYPH);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("awaken_petroglyph"), TCBlocks.AWAKEN_PETROGLYPH);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("lightening_petroglyph"), TCBlocks.LIGHTENING_PETROGLYPH);
+        Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("slain_petroglyph"), TCBlocks.SLAIN_PETROGLYPH);
+
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("monstrous_remains"), TCBlocks.MONSTROUS_REMAINS);
         Registry.register(BuiltInRegistries.BLOCK, TheCatamount.id("monstrous_skull"), TCBlocks.MONSTROUS_SKULL);
 

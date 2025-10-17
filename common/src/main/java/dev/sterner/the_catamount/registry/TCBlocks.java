@@ -26,7 +26,19 @@ public class TCBlocks {
             .sound(SoundType.SAND)
     );
 
-    public static final Block PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
+    public static final Block DEVOUR_PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
+            .sound(SoundType.STONE)
+    );
+
+    public static final Block AWAKEN_PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
+            .sound(SoundType.STONE)
+    );
+
+    public static final Block LIGHTENING_PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
+            .sound(SoundType.STONE)
+    );
+
+    public static final Block SLAIN_PETROGLYPH = new PetroglyphBlock(BlockBehaviour.Properties.of()
             .sound(SoundType.STONE)
     );
 

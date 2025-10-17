@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "the_catamount:block/awaken_petroglyph",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "the_catamount:block/awaken_petroglyph",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "the_catamount:block/awaken_petroglyph"
+    },
+    "facing=west": {
+      "model": "the_catamount:block/awaken_petroglyph",
+      "y": 90
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package dev.sterner.the_catamount.entity;
 
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
+import dev.sterner.the_catamount.entity.goal.*;
 import dev.sterner.the_catamount.registry.TCDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,15 +14,19 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -41,10 +46,10 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Integer> ANIMALS_CONSUMED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> HUMANOIDS_CONSUMED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.INT);
-
     private static final EntityDataAccessor<Boolean> FEEDING_FRENZY = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> FRENZY_KILLS_REMAINING = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FULLY_MANIFESTED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_CROUCHED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
 
     public CatamountEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
@@ -52,15 +57,34 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.63F)
+                .add(Attributes.MOVEMENT_SPEED, 0.25F)
                 .add(Attributes.MAX_HEALTH, 30.0)
-                .add(Attributes.FOLLOW_RANGE, 24.0)
-                .add(Attributes.ATTACK_DAMAGE, 3.0);
+                .add(Attributes.FOLLOW_RANGE, 32.0)
+                .add(Attributes.ATTACK_DAMAGE, 3.0)
+                .add(Attributes.ARMOR, 0)
+                .add(Attributes.ARMOR_TOUGHNESS, 0)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
+
+        this.goalSelector.addGoal(0, new CatamountVanishGoal(this));
+        this.goalSelector.addGoal(1, new CatamountConsumeGoal(this));
+        this.goalSelector.addGoal(2, new CatamountPounceGoal(this));
+        this.goalSelector.addGoal(3, new CatamountBreakBlocksGoal(this));
+        this.goalSelector.addGoal(4, new CatamountHuntGoal(this));
+        this.goalSelector.addGoal(5, new CatamountStalkGoal(this));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.5));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Animal.class,
+                10, true, false, (entity) -> !(entity instanceof AbstractHorse)));
+        this.targetSelector.addGoal(4, new HurtByTargetGoal(this));
     }
 
     @Override
@@ -73,6 +97,7 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         builder.define(FEEDING_FRENZY, false);
         builder.define(FRENZY_KILLS_REMAINING, 0);
         builder.define(FULLY_MANIFESTED, false);
+        builder.define(IS_CROUCHED, false);
     }
 
     @Override
@@ -84,6 +109,33 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
 
             if (dayTime >= 23000 || dayTime < 1000) {
                 despawnIntoWind();
+            }
+        }
+
+        if (attackCooldown > 0) {
+            attackCooldown--;
+
+            if (attackCooldown <= 0) {
+                isAttacking = false;
+                lastAttackType = AttackType.NONE;
+            }
+        }
+
+        if (!level().isClientSide && isCrouched()) {
+            LivingEntity target = getTarget();
+            if (target == null || target.getBbHeight() >= 2.0) {
+                if (tickCount % 20 == 0) {
+                    boolean hasSmallTarget = false;
+                    for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class,
+                            getBoundingBox().inflate(8.0),
+                            e -> e.getBbHeight() < 2.0 && e != this)) {
+                        hasSmallTarget = true;
+                        break;
+                    }
+                    if (!hasSmallTarget) {
+                        setCrouched(false);
+                    }
+                }
             }
         }
     }
@@ -320,6 +372,14 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         entityData.set(FULLY_MANIFESTED, manifested);
     }
 
+    public boolean isCrouched() {
+        return entityData.get(IS_CROUCHED);
+    }
+
+    public void setCrouched(boolean crouched) {
+        entityData.set(IS_CROUCHED, crouched);
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
@@ -329,11 +389,11 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         compound.putBoolean("FeedingFrenzy", isFeedingFrenzy());
         compound.putInt("FrenzyKillsRemaining", getFrenzyKillsRemaining());
         compound.putBoolean("FullyManifested", isFullyManifested());
+        compound.putBoolean("IsCrouched", isCrouched());
         if (getOwnerUUID().isPresent()) {
             compound.putUUID("OwnerUUID", getOwnerUUID().get());
         }
     }
-
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
@@ -349,6 +409,7 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         setFeedingFrenzy(compound.getBoolean("FeedingFrenzy"));
         setFrenzyKillsRemaining(compound.getInt("FrenzyKillsRemaining"));
         setFullyManifested(compound.getBoolean("FullyManifested"));
+        setCrouched(compound.getBoolean("IsCrouched"));
 
         updateAttributesForStage(getStage());
     }
@@ -375,6 +436,8 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         boolean hurt = super.doHurtTarget(target);
 
         if (hurt && target instanceof LivingEntity living) {
+            triggerAttackAnimation(living);
+
             if (isFeedingFrenzy() && living.getHealth() <= 0) {
                 onFrenzyKill(living);
             }
@@ -439,20 +502,90 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     }
 
     //------- GeckoLib -------
-    protected static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("move.walk");
+    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+    protected static final RawAnimation IDLE_CROUCHED = RawAnimation.begin().thenLoop("idle_crouched");
+    protected static final RawAnimation MOVEMENT = RawAnimation.begin().thenLoop("movement");
+    protected static final RawAnimation MOVEMENT_QUAD = RawAnimation.begin().thenLoop("movement_quad");
+    protected static final RawAnimation RUNNING = RawAnimation.begin().thenLoop("running");
+    protected static final RawAnimation POUNCE = RawAnimation.begin().thenPlay("pounce");
+    protected static final RawAnimation ATTACK_CLAW_LEFT = RawAnimation.begin().thenPlay("attack_claw_left");
+    protected static final RawAnimation ATTACK_CLAW_LEFT_CROUCHED = RawAnimation.begin().thenPlay("attack_claw_left_crouched");
+    protected static final RawAnimation ATTACK_CLAW_RIGHT_CROUCHED = RawAnimation.begin().thenPlay("attack_claw_right_crouched");
+
+    private boolean isAttacking = false;
+    private int attackCooldown = 0;
+    private AttackType lastAttackType = AttackType.NONE;
+
+    private enum AttackType {
+        NONE,
+        POUNCE,
+        CLAW_LEFT,
+        CLAW_RIGHT
+    }
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "Walking", 5, this::walkingAnimController));
+        controllers.add(new AnimationController<>(this, "movement", 5, this::movementController));
+        controllers.add(new AnimationController<>(this, "attack", 0, this::attackController));
     }
 
-    protected <E extends CatamountEntity> PlayState walkingAnimController(final AnimationState<E> event) {
-        if (event.isMoving())
-            return event.setAndContinue(WALK_ANIM);
+    protected <E extends CatamountEntity> PlayState movementController(final AnimationState<E> event) {
+        if (isAttacking) {
+            return PlayState.CONTINUE;
+        }
 
-        return PlayState.STOP;
+        if (event.isMoving()) {
+            double speed = this.getDeltaMovement().horizontalDistance();
+
+            if (isCrouched()) {
+                if (speed > 0.12) {
+                    return event.setAndContinue(RUNNING);
+                } else {
+                    return event.setAndContinue(MOVEMENT_QUAD);
+                }
+            } else {
+                return event.setAndContinue(MOVEMENT);
+            }
+        } else {
+            if (isCrouched()) {
+                return event.setAndContinue(IDLE_CROUCHED);
+            } else {
+                return event.setAndContinue(IDLE);
+            }
+        }
+    }
+
+    protected <E extends CatamountEntity> PlayState attackController(final AnimationState<E> event) {
+        if (!isAttacking || lastAttackType == AttackType.NONE) {
+            return PlayState.STOP;
+        }
+
+        return switch (lastAttackType) {
+            case POUNCE -> event.setAndContinue(POUNCE);
+            case CLAW_LEFT -> isCrouched() ?
+                    event.setAndContinue(ATTACK_CLAW_LEFT_CROUCHED) :
+                    event.setAndContinue(ATTACK_CLAW_LEFT);
+            case CLAW_RIGHT -> event.setAndContinue(ATTACK_CLAW_RIGHT_CROUCHED);
+            default -> PlayState.STOP;
+        };
+    }
+
+    private void triggerAttackAnimation(LivingEntity target) {
+        if (attackCooldown > 0) return;
+
+        isAttacking = true;
+        attackCooldown = 20;
+
+        if (!isCrouched() && target.getBbHeight() < 2.0) {
+            lastAttackType = AttackType.POUNCE;
+        } else if (isCrouched()) {
+            lastAttackType = lastAttackType == AttackType.CLAW_LEFT ?
+                    AttackType.CLAW_RIGHT : AttackType.CLAW_LEFT;
+        } else {
+            lastAttackType = AttackType.CLAW_LEFT;
+        }
     }
 
     @Override

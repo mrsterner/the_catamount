@@ -19,7 +19,6 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class TCModelProvider extends FabricModelProvider {
     public TCModelProvider(FabricDataOutput output) {
@@ -31,7 +30,6 @@ public class TCModelProvider extends FabricModelProvider {
         generators.createGenericCube(TCBlocks.BONE_HEAP);
         generators.createBrushableBlock(TCBlocks.SUSPICIOUS_DIRT);
 
-        // Petroglyphs
         createPetroglyphBlock(generators, TCBlocks.DEVOUR_PETROGLYPH, "devour");
         createPetroglyphBlock(generators, TCBlocks.AWAKEN_PETROGLYPH, "awaken");
         createPetroglyphBlock(generators, TCBlocks.LIGHTENING_PETROGLYPH, "lightening");
@@ -45,41 +43,95 @@ public class TCModelProvider extends FabricModelProvider {
     }
 
     private void createPetroglyphBlock(BlockModelGenerators generators, Block block, String name) {
-        ResourceLocation petroglyphTexture = TheCatamount.id("block/" + name + "_petroglyph");
         ResourceLocation stoneTexture = ResourceLocation.withDefaultNamespace("block/stone");
 
+        ResourceLocation singleTexture = TheCatamount.id("block/" + name + "_petroglyph");
+        ResourceLocation singleModel = createPetroglyphModel(generators, block, name + "_single", singleTexture, stoneTexture);
+
+        ResourceLocation tl = TheCatamount.id("block/" + name + "_petroglyph_full_top_left");
+        ResourceLocation tr = TheCatamount.id("block/" + name + "_petroglyph_full_top_right");
+        ResourceLocation bl = TheCatamount.id("block/" + name + "_petroglyph_full_bottom_left");
+        ResourceLocation br = TheCatamount.id("block/" + name + "_petroglyph_full_bottom_right");
+        ResourceLocation topLeftModel = createPetroglyphPartModel(generators, name + "_top_left", tl, stoneTexture);
+        ResourceLocation topRightModel = createPetroglyphPartModel(generators, name + "_top_right", tr, stoneTexture);
+        ResourceLocation bottomLeftModel = createPetroglyphPartModel(generators, name + "_bottom_left", bl, stoneTexture);
+        ResourceLocation bottomRightModel = createPetroglyphPartModel(generators, name + "_bottom_right", br, stoneTexture);
+
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(block);
+
+        PropertyDispatch.C2<Direction, PetroglyphBlock.PetroglyphPart> dispatch =
+                PropertyDispatch.properties(PetroglyphBlock.FACING, PetroglyphBlock.PART);
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            dispatch = dispatch.select(dir, PetroglyphBlock.PetroglyphPart.SINGLE, createVariant(singleModel, dir));
+        }
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            dispatch = dispatch.select(dir, PetroglyphBlock.PetroglyphPart.TOP_LEFT, createVariant(topLeftModel, dir));
+        }
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            dispatch = dispatch.select(dir, PetroglyphBlock.PetroglyphPart.TOP_RIGHT, createVariant(topRightModel, dir));
+        }
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            dispatch = dispatch.select(dir, PetroglyphBlock.PetroglyphPart.BOTTOM_LEFT, createVariant(bottomLeftModel, dir));
+        }
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            dispatch = dispatch.select(dir, PetroglyphBlock.PetroglyphPart.BOTTOM_RIGHT, createVariant(bottomRightModel, dir));
+        }
+
+        generator = generator.with(dispatch);
+        generators.blockStateOutput.accept(generator);
+        //generators.delegateItemModel(block, singleModel);
+    }
+
+    private ResourceLocation createPetroglyphModel(BlockModelGenerators generators, Block block,
+                                                   String modelName, ResourceLocation frontTexture,
+                                                   ResourceLocation stoneTexture) {
         TextureMapping mapping = new TextureMapping()
                 .put(TextureSlot.PARTICLE, stoneTexture)
-                .put(TextureSlot.NORTH, petroglyphTexture)
+                .put(TextureSlot.NORTH, frontTexture)
                 .put(TextureSlot.SOUTH, stoneTexture)
                 .put(TextureSlot.EAST, stoneTexture)
                 .put(TextureSlot.WEST, stoneTexture)
                 .put(TextureSlot.UP, stoneTexture)
                 .put(TextureSlot.DOWN, stoneTexture);
 
-        ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(block);
-
+        ResourceLocation modelLocation = TheCatamount.id("block/" + modelName);
         ModelTemplates.CUBE.create(modelLocation, mapping, generators.modelOutput);
-
-        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(block)
-                .with(PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
-                        .select(Direction.NORTH, Variant.variant()
-                                .with(VariantProperties.MODEL, modelLocation)
-                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
-                        .select(Direction.SOUTH, Variant.variant()
-                                .with(VariantProperties.MODEL, modelLocation))
-                        .select(Direction.WEST, Variant.variant()
-                                .with(VariantProperties.MODEL, modelLocation)
-                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
-                        .select(Direction.EAST, Variant.variant()
-                                .with(VariantProperties.MODEL, modelLocation)
-                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
-                );
-
-        generators.blockStateOutput.accept(generator);
-
-        generators.delegateItemModel(block, modelLocation);
+        return modelLocation;
     }
 
-}
+    private ResourceLocation createPetroglyphPartModel(BlockModelGenerators generators,
+                                                       String modelName, ResourceLocation fullTexture,
+                                                       ResourceLocation stoneTexture) {
+        TextureMapping mapping = new TextureMapping()
+                .put(TextureSlot.PARTICLE, stoneTexture)
+                .put(TextureSlot.NORTH, fullTexture)
+                .put(TextureSlot.SOUTH, stoneTexture)
+                .put(TextureSlot.EAST, stoneTexture)
+                .put(TextureSlot.WEST, stoneTexture)
+                .put(TextureSlot.UP, stoneTexture)
+                .put(TextureSlot.DOWN, stoneTexture);
 
+        ResourceLocation modelLocation = TheCatamount.id("block/" + modelName);
+        ModelTemplates.CUBE.create(modelLocation, mapping, generators.modelOutput);
+        return modelLocation;
+    }
+
+    private Variant createVariant(ResourceLocation model, Direction facing) {
+        VariantProperties.Rotation rotation = switch (facing) {
+            case NORTH -> VariantProperties.Rotation.R180;
+            case SOUTH -> VariantProperties.Rotation.R0;
+            case WEST -> VariantProperties.Rotation.R90;
+            case EAST -> VariantProperties.Rotation.R270;
+            default -> VariantProperties.Rotation.R0;
+        };
+
+        return Variant.variant()
+                .with(VariantProperties.MODEL, model)
+                .with(VariantProperties.Y_ROT, rotation);
+    }
+}

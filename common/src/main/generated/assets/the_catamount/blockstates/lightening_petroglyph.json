@@ -1,18 +1,83 @@
 {
   "variants": {
-    "facing=east": {
-      "model": "the_catamount:block/lightening_petroglyph",
+    "facing=east,part=bottom_left": {
+      "model": "the_catamount:block/lightening_bottom_left",
       "y": 270
     },
-    "facing=north": {
-      "model": "the_catamount:block/lightening_petroglyph",
+    "facing=east,part=bottom_right": {
+      "model": "the_catamount:block/lightening_bottom_right",
+      "y": 270
+    },
+    "facing=east,part=single": {
+      "model": "the_catamount:block/lightening_single",
+      "y": 270
+    },
+    "facing=east,part=top_left": {
+      "model": "the_catamount:block/lightening_top_left",
+      "y": 270
+    },
+    "facing=east,part=top_right": {
+      "model": "the_catamount:block/lightening_top_right",
+      "y": 270
+    },
+    "facing=north,part=bottom_left": {
+      "model": "the_catamount:block/lightening_bottom_left",
       "y": 180
     },
-    "facing=south": {
-      "model": "the_catamount:block/lightening_petroglyph"
+    "facing=north,part=bottom_right": {
+      "model": "the_catamount:block/lightening_bottom_right",
+      "y": 180
     },
-    "facing=west": {
-      "model": "the_catamount:block/lightening_petroglyph",
+    "facing=north,part=single": {
+      "model": "the_catamount:block/lightening_single",
+      "y": 180
+    },
+    "facing=north,part=top_left": {
+      "model": "the_catamount:block/lightening_top_left",
+      "y": 180
+    },
+    "facing=north,part=top_right": {
+      "model": "the_catamount:block/lightening_top_right",
+      "y": 180
+    },
+    "facing=south,part=bottom_left": {
+      "model": "the_catamount:block/lightening_bottom_left",
+      "y": 0
+    },
+    "facing=south,part=bottom_right": {
+      "model": "the_catamount:block/lightening_bottom_right",
+      "y": 0
+    },
+    "facing=south,part=single": {
+      "model": "the_catamount:block/lightening_single",
+      "y": 0
+    },
+    "facing=south,part=top_left": {
+      "model": "the_catamount:block/lightening_top_left",
+      "y": 0
+    },
+    "facing=south,part=top_right": {
+      "model": "the_catamount:block/lightening_top_right",
+      "y": 0
+    },
+    "facing=west,part=bottom_left": {
+      "model": "the_catamount:block/lightening_bottom_left",
+      "y": 90
+    },
+    "facing=west,part=bottom_right": {
+      "model": "the_catamount:block/lightening_bottom_right",
+      "y": 90
+    },
+    "facing=west,part=single": {
+      "model": "the_catamount:block/lightening_single",
+      "y": 90
+    },
+    "facing=west,part=top_left": {
+      "model": "the_catamount:block/lightening_top_left",
+      "y": 90
+    },
+    "facing=west,part=top_right": {
+      "model": "the_catamount:block/lightening_top_right",
       "y": 90
     }
   }

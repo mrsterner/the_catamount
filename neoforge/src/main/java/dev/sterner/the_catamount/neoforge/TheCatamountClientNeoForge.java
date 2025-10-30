@@ -6,6 +6,8 @@ import dev.sterner.the_catamount.TheCatamount;
 import dev.sterner.the_catamount.client.CatamountHudOverlay;
 import dev.sterner.the_catamount.client.ClientTickHandler;
 import dev.sterner.the_catamount.client.StrugglingSpiritParticle;
+import dev.sterner.the_catamount.client.model.DevouredModel;
+import dev.sterner.the_catamount.client.model.WindEntityModel;
 import dev.sterner.the_catamount.client.render.*;
 import dev.sterner.the_catamount.registry.*;
 import net.minecraft.ChatFormatting;
@@ -33,6 +35,12 @@ public class TheCatamountClientNeoForge {
         event.registerEntityRenderer(TCEntityTypes.DEVOURED, DevouredRenderer::new);
         event.registerEntityRenderer(TCEntityTypes.WIND, WindEntityRenderer::new);
         event.registerEntityRenderer(TCEntityTypes.LIGHT_ORB, LightOrbEntityRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event){
+        event.registerLayerDefinition(DevouredModel.LAYER, DevouredModel::createBodyLayer);
+        event.registerLayerDefinition(WindEntityModel.LAYER, WindEntityModel::createBodyLayer);
     }
 
     @SubscribeEvent

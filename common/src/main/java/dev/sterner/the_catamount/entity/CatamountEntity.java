@@ -1,11 +1,16 @@
 package dev.sterner.the_catamount.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import dev.sterner.the_catamount.TheCatamount;
 import dev.sterner.the_catamount.data_attachment.CatamountPlayerDataAttachment;
-import dev.sterner.the_catamount.entity.goal.*;
+import dev.sterner.the_catamount.entity.brain.CatamountBrain;
 import dev.sterner.the_catamount.registry.TCDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -14,22 +19,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -37,6 +40,7 @@ import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,9 +54,19 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<Integer> FRENZY_KILLS_REMAINING = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FULLY_MANIFESTED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_CROUCHED = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_ATTACKING = SynchedEntityData.defineId(CatamountEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<AttackType> ATTACK_TYPE = SynchedEntityData.defineId(CatamountEntity.class, TheCatamount.ATTACK_TYPE);
 
     public CatamountEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
+        this.moveControl = new SmoothCatamountMoveControl(this,10, 1f);
+
+    }
+
+    @Nullable
+    @Override
+    public LivingEntity getTarget() {
+        return this.getTargetFromBrain();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -67,27 +81,6 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    protected void registerGoals() {
-        super.registerGoals();
-
-        this.goalSelector.addGoal(0, new CatamountVanishGoal(this));
-        this.goalSelector.addGoal(1, new CatamountConsumeGoal(this));
-        this.goalSelector.addGoal(2, new CatamountPounceGoal(this));
-        this.goalSelector.addGoal(3, new CatamountBreakBlocksGoal(this));
-        this.goalSelector.addGoal(4, new CatamountHuntGoal(this));
-        this.goalSelector.addGoal(5, new CatamountStalkGoal(this));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.5));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
-        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Animal.class,
-                10, true, false, (entity) -> !(entity instanceof AbstractHorse)));
-        this.targetSelector.addGoal(4, new HurtByTargetGoal(this));
-    }
-
-    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(STAGE, 3);
@@ -98,6 +91,41 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         builder.define(FRENZY_KILLS_REMAINING, 0);
         builder.define(FULLY_MANIFESTED, false);
         builder.define(IS_CROUCHED, false);
+        builder.define(IS_ATTACKING, false);
+        builder.define(ATTACK_TYPE, AttackType.NONE);
+    }
+
+    public boolean isAttacking() {
+        return entityData.get(IS_ATTACKING);
+    }
+
+    public void setAttacking(boolean attacking) {
+        entityData.set(IS_ATTACKING, attacking);
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        this.level().getProfiler().push("catamountBrain");
+        this.getBrain().tick((ServerLevel)this.level(), this);
+        this.level().getProfiler().popPush("catamountActivityUpdate");
+        CatamountBrain.updateActivity(this);
+        this.level().getProfiler().pop();
+    }
+
+    @Override
+    protected @NotNull Brain<?> makeBrain(Dynamic<?> dynamic) {
+        return CatamountBrain.makeBrain(this, dynamic);
+    }
+
+    protected Brain.@NotNull Provider<CatamountEntity> brainProvider() {
+        return Brain.provider(CatamountBrain.MEMORIES, CatamountBrain.SENSORS);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NotNull Brain<CatamountEntity> getBrain() {
+        return (Brain<CatamountEntity>) super.getBrain();
     }
 
     @Override
@@ -111,33 +139,11 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
                 despawnIntoWind();
             }
         }
+    }
 
-        if (attackCooldown > 0) {
-            attackCooldown--;
-
-            if (attackCooldown <= 0) {
-                isAttacking = false;
-                lastAttackType = AttackType.NONE;
-            }
-        }
-
-        if (!level().isClientSide && isCrouched()) {
-            LivingEntity target = getTarget();
-            if (target == null || target.getBbHeight() >= 2.0) {
-                if (tickCount % 20 == 0) {
-                    boolean hasSmallTarget = false;
-                    for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class,
-                            getBoundingBox().inflate(8.0),
-                            e -> e.getBbHeight() < 2.0 && e != this)) {
-                        hasSmallTarget = true;
-                        break;
-                    }
-                    if (!hasSmallTarget) {
-                        setCrouched(false);
-                    }
-                }
-            }
-        }
+    public boolean isActuallyMoving(CatamountEntity entity) {
+        Vec3 m = entity.getDeltaMovement();
+        return m.horizontalDistanceSqr() > 0.0001;
     }
 
     private void despawnIntoWind() {
@@ -161,17 +167,7 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         discard();
     }
 
-    public void onConsumeAnimal() {
-        entityData.set(ANIMALS_CONSUMED, entityData.get(ANIMALS_CONSUMED) + 1);
-        updateDynamicAttributes();
-    }
-
-    public void onConsumeHumanoid() {
-        entityData.set(HUMANOIDS_CONSUMED, entityData.get(HUMANOIDS_CONSUMED) + 1);
-        updateDynamicAttributes();
-    }
-
-    private void updateDynamicAttributes() {
+    public void updateDynamicAttributes() {
         double baseHP = switch (getStage()) {
             case 3 -> 50;
             case 4 -> 150;
@@ -190,12 +186,16 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
 
         int prevStage = getStage();
 
+        //TODO reenable when more stages exist
+        /*
         if (getStage() == 3 && hp >= 200) setStage(4);
         else if (getStage() == 4 && hp >= 400) setStage(5);
 
         if (getStage() != prevStage) {
             updateAttributesForStage(getStage());
         }
+
+         */
     }
 
     private void updateAttributesForStage(int stage) {
@@ -436,7 +436,8 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         boolean hurt = super.doHurtTarget(target);
 
         if (hurt && target instanceof LivingEntity living) {
-            triggerAttackAnimation(living);
+            boolean isPounce = entityData.get(ATTACK_TYPE) == AttackType.POUNCE;
+            triggerAttackAnimation(living, isPounce);
 
             if (isFeedingFrenzy() && living.getHealth() <= 0) {
                 onFrenzyKill(living);
@@ -512,15 +513,27 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     protected static final RawAnimation ATTACK_CLAW_LEFT_CROUCHED = RawAnimation.begin().thenPlay("attack_claw_left_crouched");
     protected static final RawAnimation ATTACK_CLAW_RIGHT_CROUCHED = RawAnimation.begin().thenPlay("attack_claw_right_crouched");
 
-    private boolean isAttacking = false;
-    private int attackCooldown = 0;
-    private AttackType lastAttackType = AttackType.NONE;
 
-    private enum AttackType {
+
+    public enum AttackType implements StringRepresentable {
         NONE,
         POUNCE,
         CLAW_LEFT,
-        CLAW_RIGHT
+        CLAW_RIGHT;
+
+        @Override
+        public String getSerializedName() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+
+        public static Codec<AttackType> CODEC = StringRepresentable.fromEnum(AttackType::values);
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, AttackType> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, value) -> buf.writeUtf(value.getSerializedName()),
+                        buf -> AttackType.valueOf(buf.readUtf().toUpperCase(Locale.ROOT))
+                );
+
     }
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -532,11 +545,11 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     }
 
     protected <E extends CatamountEntity> PlayState movementController(final AnimationState<E> event) {
-        if (isAttacking) {
+        if (entityData.get(IS_ATTACKING)) {
             return PlayState.CONTINUE;
         }
 
-        if (event.isMoving()) {
+        if (isActuallyMoving(event.getAnimatable())) {
             double speed = this.getDeltaMovement().horizontalDistance();
 
             if (isCrouched()) {
@@ -558,11 +571,16 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
     }
 
     protected <E extends CatamountEntity> PlayState attackController(final AnimationState<E> event) {
-        if (!isAttacking || lastAttackType == AttackType.NONE) {
+        if (!isAttacking()) {
+            entityData.set(ATTACK_TYPE, AttackType.NONE);
             return PlayState.STOP;
         }
 
-        return switch (lastAttackType) {
+        if (entityData.get(ATTACK_TYPE) == AttackType.NONE) {
+            return PlayState.STOP;
+        }
+
+        return switch (entityData.get(ATTACK_TYPE)) {
             case POUNCE -> event.setAndContinue(POUNCE);
             case CLAW_LEFT -> isCrouched() ?
                     event.setAndContinue(ATTACK_CLAW_LEFT_CROUCHED) :
@@ -572,21 +590,19 @@ public class CatamountEntity extends PathfinderMob implements GeoEntity {
         };
     }
 
-    private void triggerAttackAnimation(LivingEntity target) {
-        if (attackCooldown > 0) return;
 
-        isAttacking = true;
-        attackCooldown = 20;
+    public void triggerAttackAnimation(LivingEntity target, boolean isPounce) {
+        setAttacking(true);
 
-        if (!isCrouched() && target.getBbHeight() < 2.0) {
-            lastAttackType = AttackType.POUNCE;
+        if (isPounce) {
+            entityData.set(ATTACK_TYPE, AttackType.POUNCE);
         } else if (isCrouched()) {
-            lastAttackType = lastAttackType == AttackType.CLAW_LEFT ?
-                    AttackType.CLAW_RIGHT : AttackType.CLAW_LEFT;
+            entityData.set(ATTACK_TYPE, entityData.get(ATTACK_TYPE) == AttackType.CLAW_LEFT ? AttackType.CLAW_RIGHT : AttackType.CLAW_LEFT);
         } else {
-            lastAttackType = AttackType.CLAW_LEFT;
+            entityData.set(ATTACK_TYPE, AttackType.CLAW_LEFT);
         }
     }
+
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {

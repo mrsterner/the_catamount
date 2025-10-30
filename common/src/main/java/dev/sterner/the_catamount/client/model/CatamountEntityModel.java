@@ -8,8 +8,28 @@ import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 public class CatamountEntityModel extends DefaultedEntityGeoModel<CatamountEntity> {
 
     public CatamountEntityModel() {
-        super(TheCatamount.id("catamount"));
+        super(TheCatamount.id("catamount"), true);
     }
+/*
+    @Override
+    public void setCustomAnimations(CatamountEntity animatable, long instanceId, AnimationState<CatamountEntity> animationState) {
+        GeoBone head = getAnimationProcessor().getBone(this.headBone);
+
+        if (head != null) {
+            EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
+
+            float pitch = entityData.headPitch() * Mth.DEG_TO_RAD;
+
+            if (animatable.isCrouched()) {
+                pitch += 90f * Mth.DEG_TO_RAD;
+            }
+
+            head.setRotX(pitch);
+            head.setRotY(entityData.netHeadYaw() * Mth.DEG_TO_RAD);
+        }
+    }
+
+ */
 
     @Override
     public ResourceLocation getModelResource(CatamountEntity entity) {

@@ -7,6 +7,7 @@ import dev.sterner.the_catamount.client.CatamountHudOverlay;
 import dev.sterner.the_catamount.client.ClientTickHandler;
 import dev.sterner.the_catamount.client.StrugglingSpiritParticle;
 import dev.sterner.the_catamount.client.model.DevouredModel;
+import dev.sterner.the_catamount.client.model.WindEntityModel;
 import dev.sterner.the_catamount.client.render.*;
 import dev.sterner.the_catamount.payload.*;
 import dev.sterner.the_catamount.registry.*;
@@ -38,6 +39,7 @@ public class TheCatamountClientFabric implements ClientModInitializer {
         EntityRendererRegistry.register(TCEntityTypes.LIGHT_ORB, LightOrbEntityRenderer::new);
 
         EntityModelLayerRegistry.registerModelLayer(DevouredModel.LAYER, DevouredModel::createBodyLayer);
+        EntityModelLayerRegistry.registerModelLayer(WindEntityModel.LAYER, WindEntityModel::createBodyLayer);
 
         BlockEntityRenderers.register(TCBlockEntityTypes.SUSPICIOUS_DIRT, SuspiciousDirtBlockEntityRenderer::new);
 

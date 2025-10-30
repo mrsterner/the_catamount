@@ -1,0 +1,17 @@
+{
+  "structures": [
+    {
+      "structure": "the_catamount:haunting_grounds",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+
+    "salt": 1284160154,
+
+    "spacing": 12,
+
+    "separation": 4
+  }
+}

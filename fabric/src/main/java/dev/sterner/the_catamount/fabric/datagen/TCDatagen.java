@@ -11,5 +11,6 @@ public class TCDatagen implements DataGeneratorEntrypoint {
 		pack.addProvider(TCModelProvider::new);
 		pack.addProvider(TCLangProvider::new);
 		pack.addProvider(TCSoulConversionProvider::new);
+		pack.addProvider(TCBiomeTagProvider::new);
 	}
 }

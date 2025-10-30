@@ -5,6 +5,7 @@ import dev.sterner.the_catamount.data_attachment.PaleAnimalDataAttachment;
 import dev.sterner.the_catamount.data_attachment.TCDataAttachmentsFabric;
 import dev.sterner.the_catamount.entity.CatamountEntity;
 import dev.sterner.the_catamount.entity.DevouredEntity;
+import dev.sterner.the_catamount.entity.WindEntity;
 import dev.sterner.the_catamount.events.ModEventHandlers;
 import dev.sterner.the_catamount.listener.SoulConversionListener;
 import dev.sterner.the_catamount.payload.*;
@@ -21,6 +22,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import static dev.sterner.the_catamount.TheCatamount.ATTACK_TYPE;
+
 public class TheCatamountFabric implements ModInitializer {
 
     @Override
@@ -39,6 +43,9 @@ public class TheCatamountFabric implements ModInitializer {
         TheCatamount.init();
         TCDataAttachmentsFabric.init();
         TCParticlesFabric.init();
+
+        Registry.register(BuiltInRegistries.SENSOR_TYPE, TheCatamount.id("catamount_sensor"), TCSensorTypes.CATAMOUNT_SENSOR);
+        EntityDataSerializers.registerSerializer(ATTACK_TYPE);
 
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("beast_ivory"), TCItems.BEAST_IVORY);
         Registry.register(BuiltInRegistries.ITEM,  TheCatamount.id("white_ash"), TCItems.WHITE_ASH);
@@ -73,6 +80,7 @@ public class TheCatamountFabric implements ModInitializer {
 
         FabricDefaultAttributeRegistry.register(TCEntityTypes.CATAMOUNT, CatamountEntity.createAttributes().build() );
         FabricDefaultAttributeRegistry.register(TCEntityTypes.DEVOURED, DevouredEntity.createAttributes().build() );
+        FabricDefaultAttributeRegistry.register(TCEntityTypes.WIND, WindEntity.createAttributes().build() );
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, TheCatamount.id("white_ash_coated"), TCDataComponents.WHITE_ASH_COATED);
 
         ServerTickEvents.END_WORLD_TICK.register(ModEventHandlers::onServerLevelTick);
